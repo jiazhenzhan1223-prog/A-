@@ -32,6 +32,115 @@
       min-height: 100vh;
     }
 
+    /* ══════════════ LOGIN OVERLAY ══════════════ */
+    #login-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, #1a56db 0%, #7e3af2 100%);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+    #login-overlay.hidden { display: none; }
+
+    .login-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      text-align: center;
+    }
+    .login-logo { font-size: 40px; margin-bottom: 8px; }
+    .login-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .login-box input[type="password"] {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .login-box input[type="password"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,86,219,.15);
+    }
+    .login-box input.shake {
+      animation: shake .4s ease;
+      border-color: var(--expense) !important;
+    }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)}
+      60%{transform:translateX(-6px)}
+      80%{transform:translateX(6px)}
+    }
+    .login-error {
+      font-size: 13px;
+      color: var(--expense);
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .login-btn:hover { opacity: .88; }
+    .login-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ══════════════ CHANGE PASSWORD MODAL ══════════════ */
+    #pwd-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 8888;
+    }
+    #pwd-modal.hidden { display: none; }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 28px 24px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    }
+    .modal-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+    .modal-box .form-group { margin-bottom: 14px; }
+    .modal-box label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+    .modal-box input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .modal-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,86,219,.12);
+    }
+    .modal-msg { font-size: 13px; min-height: 18px; margin-bottom: 12px; }
+    .modal-msg.error { color: var(--expense); }
+    .modal-msg.success { color: var(--income); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* ══════════════ APP SHELL ══════════════ */
+    #app { display: none; }
+    #app.visible { display: block; }
+
     /* ── Header ── */
     header {
       background: var(--primary);
@@ -43,7 +152,19 @@
       height: 56px;
       box-shadow: 0 2px 4px rgba(0,0,0,.15);
     }
-    header h1 { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    header h1 { font-size: 18px; font-weight: 700; white-space: nowrap; flex: 1; }
+    .header-btn {
+      background: rgba(255,255,255,.18);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .header-btn:hover { background: rgba(255,255,255,.28); }
 
     /* ── Tabs ── */
     .tabs {
@@ -69,18 +190,12 @@
 
     /* ── Layout ── */
     main { max-width: 1200px; margin: 0 auto; padding: 24px; }
-
     .panel { display: none; }
     .panel.active { display: block; }
 
     /* ── Summary Cards ── */
     .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
+    .card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
     .card-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
     .card-value { font-size: 28px; font-weight: 700; }
     .card.income  { border-left: 4px solid var(--income);  background: var(--income-light); }
@@ -91,62 +206,29 @@
     .card.balance .card-value { color: var(--balance); }
 
     /* ── Form Box ── */
-    .form-box {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-      overflow: hidden;
-    }
+    .form-box { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden; }
     .form-box summary {
-      padding: 14px 20px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-      background: var(--primary-light);
-      color: var(--primary);
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding: 14px 20px; font-size: 15px; font-weight: 600; cursor: pointer;
+      user-select: none; background: var(--primary-light); color: var(--primary);
+      list-style: none; display: flex; align-items: center; gap: 8px;
     }
     .form-box summary::before { content: "▶"; font-size: 11px; transition: transform .2s; }
     details[open] .form-box summary::before { transform: rotate(90deg); }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      padding: 20px;
-    }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; padding: 20px; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group.full { grid-column: 1 / -1; }
     label { font-size: 13px; font-weight: 500; color: var(--muted); }
     input, select, textarea {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
+      border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px;
+      font-size: 14px; color: var(--text); background: #fff;
       transition: border-color .15s, box-shadow .15s;
     }
     input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(26,86,219,.15);
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.15);
     }
     textarea { resize: vertical; min-height: 72px; font-family: inherit; }
     .form-actions { padding: 0 20px 20px; display: flex; gap: 10px; }
-    .btn {
-      padding: 9px 20px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: opacity .15s;
-    }
+    .btn { padding: 9px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: opacity .15s; }
     .btn:hover { opacity: .85; }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-secondary { background: var(--border); color: var(--text); }
@@ -154,65 +236,23 @@
     .btn-success { background: var(--income); color: #fff; }
 
     /* ── Table Box ── */
-    .table-box {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .table-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
+    .table-box { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .table-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
     .table-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
-    .search-input {
-      padding: 7px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      width: 200px;
-    }
+    .search-input { padding: 7px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; width: 200px; }
     .filter-select { width: 140px; }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th {
-      background: var(--bg);
-      padding: 11px 14px;
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
+    th { background: var(--bg); padding: 11px 14px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--border); white-space: nowrap; }
     td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f5f7ff; }
     .amount { font-weight: 600; font-variant-numeric: tabular-nums; }
     .amount.income  { color: var(--income); }
     .amount.expense { color: var(--expense); }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      background: var(--primary-light);
-      color: var(--primary);
-    }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; background: var(--primary-light); color: var(--primary); }
     .empty-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 15px; }
-    tfoot td {
-      font-weight: 700;
-      background: var(--bg);
-      border-top: 2px solid var(--border);
-      font-size: 13px;
-    }
+    tfoot td { font-weight: 700; background: var(--bg); border-top: 2px solid var(--border); font-size: 13px; }
 
     /* ── Responsive ── */
     @media (max-width: 640px) {
@@ -222,199 +262,305 @@
       .search-input { width: 100%; }
       .filter-select { width: 100%; }
       .table-header { flex-direction: column; align-items: stretch; }
+      header h1 { font-size: 15px; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>⛰ 戈21 A+ 募集资金管理</h1>
-</header>
-
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="income">💰 收入管理</button>
-  <button class="tab-btn" data-tab="expense">💸 支出管理</button>
-</nav>
-
-<main>
-
-  <!-- ══════════════ 收入 Panel ══════════════ -->
-  <div id="income" class="panel active">
-
-    <div class="summary" id="income-summary">
-      <div class="card income">
-        <div class="card-label">总收入</div>
-        <div class="card-value" id="total-income">¥0.00</div>
-      </div>
-      <div class="card balance">
-        <div class="card-label">笔数</div>
-        <div class="card-value" id="total-income-count">0</div>
-      </div>
-    </div>
-
-    <details>
-      <div class="form-box">
-        <summary>+ 新增收入记录</summary>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="in-date">日期 *</label>
-            <input type="date" id="in-date" required />
-          </div>
-          <div class="form-group">
-            <label for="in-type">收入类型 *</label>
-            <select id="in-type">
-              <option value="捐款">捐款</option>
-              <option value="缴费">缴费</option>
-              <option value="报名费">报名费</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="in-person">出资人 *</label>
-            <input type="text" id="in-person" placeholder="姓名" required />
-          </div>
-          <div class="form-group">
-            <label for="in-amount">金额（元）*</label>
-            <input type="number" id="in-amount" placeholder="0.00" min="0" step="0.01" required />
-          </div>
-          <div class="form-group full">
-            <label for="in-remark">备注</label>
-            <textarea id="in-remark" placeholder="可选备注说明..."></textarea>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addRecord('income')">确认添加</button>
-          <button class="btn btn-secondary" onclick="clearForm('income')">清空</button>
-        </div>
-      </div>
-    </details>
-
-    <div class="table-box">
-      <div class="table-header">
-        <h3>收入明细</h3>
-        <input class="search-input" type="text" id="in-search" placeholder="搜索出资人/备注..." oninput="renderTable('income')" />
-        <select class="filter-select" id="in-filter" onchange="renderTable('income')">
-          <option value="">全部类型</option>
-          <option value="捐款">捐款</option>
-          <option value="缴费">缴费</option>
-          <option value="报名费">报名费</option>
-          <option value="其他">其他</option>
-        </select>
-        <button class="btn btn-success" onclick="downloadCSV('income')">⬇ 下载 CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>日期</th>
-              <th>收入类型</th>
-              <th>出资人</th>
-              <th>金额（元）</th>
-              <th>备注</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="income-tbody"></tbody>
-          <tfoot id="income-tfoot"></tfoot>
-        </table>
-      </div>
-    </div>
-
+<!-- ══════════════ LOGIN OVERLAY ══════════════ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">⛰</div>
+    <div class="login-title">戈21 A+ 资金管理</div>
+    <div class="login-sub">请输入访问密码</div>
+    <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" />
+    <div class="login-error" id="login-error"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">登 录</button>
   </div>
+</div>
 
-  <!-- ══════════════ 支出 Panel ══════════════ -->
-  <div id="expense" class="panel">
-
-    <div class="summary">
-      <div class="card expense">
-        <div class="card-label">总支出</div>
-        <div class="card-value" id="total-expense">¥0.00</div>
-      </div>
-      <div class="card balance">
-        <div class="card-label">笔数</div>
-        <div class="card-value" id="total-expense-count">0</div>
-      </div>
+<!-- ══════════════ CHANGE PASSWORD MODAL ══════════════ -->
+<div id="pwd-modal" class="hidden">
+  <div class="modal-box">
+    <h3>🔑 修改密码</h3>
+    <div class="form-group">
+      <label>当前密码</label>
+      <input type="password" id="pwd-old" placeholder="输入当前密码" />
     </div>
-
-    <details>
-      <div class="form-box">
-        <summary>+ 新增支出记录</summary>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="ex-date">日期 *</label>
-            <input type="date" id="ex-date" required />
-          </div>
-          <div class="form-group">
-            <label for="ex-type">支出类型 *</label>
-            <select id="ex-type">
-              <option value="物料">物料</option>
-              <option value="活动">活动</option>
-              <option value="报名费">报名费</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="ex-person">支出对象</label>
-            <input type="text" id="ex-person" placeholder="收款方/经办人" />
-          </div>
-          <div class="form-group">
-            <label for="ex-amount">金额（元）*</label>
-            <input type="number" id="ex-amount" placeholder="0.00" min="0" step="0.01" required />
-          </div>
-          <div class="form-group full">
-            <label for="ex-remark">备注</label>
-            <textarea id="ex-remark" placeholder="可选备注说明..."></textarea>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addRecord('expense')">确认添加</button>
-          <button class="btn btn-secondary" onclick="clearForm('expense')">清空</button>
-        </div>
-      </div>
-    </details>
-
-    <div class="table-box">
-      <div class="table-header">
-        <h3>支出明细</h3>
-        <input class="search-input" type="text" id="ex-search" placeholder="搜索支出对象/备注..." oninput="renderTable('expense')" />
-        <select class="filter-select" id="ex-filter" onchange="renderTable('expense')">
-          <option value="">全部类型</option>
-          <option value="物料">物料</option>
-          <option value="活动">活动</option>
-          <option value="报名费">报名费</option>
-          <option value="其他">其他</option>
-        </select>
-        <button class="btn btn-success" onclick="downloadCSV('expense')">⬇ 下载 CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>日期</th>
-              <th>支出类型</th>
-              <th>支出对象</th>
-              <th>金额（元）</th>
-              <th>备注</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="expense-tbody"></tbody>
-          <tfoot id="expense-tfoot"></tfoot>
-        </table>
-      </div>
+    <div class="form-group">
+      <label>新密码</label>
+      <input type="password" id="pwd-new" placeholder="至少 6 位" />
     </div>
-
+    <div class="form-group">
+      <label>确认新密码</label>
+      <input type="password" id="pwd-confirm" placeholder="再次输入新密码" />
+    </div>
+    <div class="modal-msg" id="pwd-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closePwdModal()">取消</button>
+      <button class="btn btn-primary" onclick="changePassword()">确认修改</button>
+    </div>
   </div>
+</div>
 
-</main>
+<!-- ══════════════ APP ══════════════ -->
+<div id="app">
+
+  <header>
+    <h1>⛰ 戈21 A+ 募集资金管理</h1>
+    <button class="header-btn" onclick="openPwdModal()">修改密码</button>
+    <button class="header-btn" onclick="doLogout()">退出登录</button>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="income">💰 收入管理</button>
+    <button class="tab-btn" data-tab="expense">💸 支出管理</button>
+  </nav>
+
+  <main>
+
+    <!-- 收入 Panel -->
+    <div id="income" class="panel active">
+      <div class="summary">
+        <div class="card income">
+          <div class="card-label">总收入</div>
+          <div class="card-value" id="total-income">¥0.00</div>
+        </div>
+        <div class="card balance">
+          <div class="card-label">笔数</div>
+          <div class="card-value" id="total-income-count">0</div>
+        </div>
+      </div>
+
+      <details>
+        <div class="form-box">
+          <summary>+ 新增收入记录</summary>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="in-date">日期 *</label>
+              <input type="date" id="in-date" required />
+            </div>
+            <div class="form-group">
+              <label for="in-type">收入类型 *</label>
+              <select id="in-type">
+                <option value="捐款">捐款</option>
+                <option value="缴费">缴费</option>
+                <option value="报名费">报名费</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="in-person">出资人 *</label>
+              <input type="text" id="in-person" placeholder="姓名" required />
+            </div>
+            <div class="form-group">
+              <label for="in-amount">金额（元）*</label>
+              <input type="number" id="in-amount" placeholder="0.00" min="0" step="0.01" required />
+            </div>
+            <div class="form-group full">
+              <label for="in-remark">备注</label>
+              <textarea id="in-remark" placeholder="可选备注说明..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addRecord('income')">确认添加</button>
+            <button class="btn btn-secondary" onclick="clearForm('income')">清空</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="table-box">
+        <div class="table-header">
+          <h3>收入明细</h3>
+          <input class="search-input" type="text" id="in-search" placeholder="搜索出资人/备注..." oninput="renderTable('income')" />
+          <select class="filter-select" id="in-filter" onchange="renderTable('income')">
+            <option value="">全部类型</option>
+            <option value="捐款">捐款</option>
+            <option value="缴费">缴费</option>
+            <option value="报名费">报名费</option>
+            <option value="其他">其他</option>
+          </select>
+          <button class="btn btn-success" onclick="downloadCSV('income')">⬇ 下载 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>日期</th><th>收入类型</th><th>出资人</th><th>金额（元）</th><th>备注</th><th>操作</th></tr>
+            </thead>
+            <tbody id="income-tbody"></tbody>
+            <tfoot id="income-tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支出 Panel -->
+    <div id="expense" class="panel">
+      <div class="summary">
+        <div class="card expense">
+          <div class="card-label">总支出</div>
+          <div class="card-value" id="total-expense">¥0.00</div>
+        </div>
+        <div class="card balance">
+          <div class="card-label">笔数</div>
+          <div class="card-value" id="total-expense-count">0</div>
+        </div>
+      </div>
+
+      <details>
+        <div class="form-box">
+          <summary>+ 新增支出记录</summary>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="ex-date">日期 *</label>
+              <input type="date" id="ex-date" required />
+            </div>
+            <div class="form-group">
+              <label for="ex-type">支出类型 *</label>
+              <select id="ex-type">
+                <option value="物料">物料</option>
+                <option value="活动">活动</option>
+                <option value="报名费">报名费</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="ex-person">支出对象</label>
+              <input type="text" id="ex-person" placeholder="收款方/经办人" />
+            </div>
+            <div class="form-group">
+              <label for="ex-amount">金额（元）*</label>
+              <input type="number" id="ex-amount" placeholder="0.00" min="0" step="0.01" required />
+            </div>
+            <div class="form-group full">
+              <label for="ex-remark">备注</label>
+              <textarea id="ex-remark" placeholder="可选备注说明..."></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="addRecord('expense')">确认添加</button>
+            <button class="btn btn-secondary" onclick="clearForm('expense')">清空</button>
+          </div>
+        </div>
+      </details>
+
+      <div class="table-box">
+        <div class="table-header">
+          <h3>支出明细</h3>
+          <input class="search-input" type="text" id="ex-search" placeholder="搜索支出对象/备注..." oninput="renderTable('expense')" />
+          <select class="filter-select" id="ex-filter" onchange="renderTable('expense')">
+            <option value="">全部类型</option>
+            <option value="物料">物料</option>
+            <option value="活动">活动</option>
+            <option value="报名费">报名费</option>
+            <option value="其他">其他</option>
+          </select>
+          <button class="btn btn-success" onclick="downloadCSV('expense')">⬇ 下载 CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>日期</th><th>支出类型</th><th>支出对象</th><th>金额（元）</th><th>备注</th><th>操作</th></tr>
+            </thead>
+            <tbody id="expense-tbody"></tbody>
+            <tfoot id="expense-tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div><!-- #app -->
 
 <script>
-// ── Storage helpers ──
+// ══════════════ PASSWORD SYSTEM ══════════════
+const PWD_HASH_KEY = 'ge21_pwd_hash';
+const SESSION_KEY  = 'ge21_authed';
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function initPwd() {
+  if (!localStorage.getItem(PWD_HASH_KEY)) {
+    localStorage.setItem(PWD_HASH_KEY, await sha256('20260601'));
+  }
+}
+
+async function verifyPwd(input) {
+  return (await sha256(input)) === localStorage.getItem(PWD_HASH_KEY);
+}
+
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  const inp = document.getElementById('login-pwd');
+  const err = document.getElementById('login-error');
+  btn.disabled = true;
+
+  if (await verifyPwd(inp.value)) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    appInit();
+  } else {
+    err.textContent = '密码错误，请重试';
+    inp.value = '';
+    inp.classList.add('shake');
+    inp.addEventListener('animationend', () => inp.classList.remove('shake'), { once: true });
+  }
+  btn.disabled = false;
+}
+
+function doLogout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('login-pwd').value = '';
+  document.getElementById('login-error').textContent = '';
+}
+
+// ── Change password modal ──
+function openPwdModal() {
+  ['pwd-old','pwd-new','pwd-confirm'].forEach(id => document.getElementById(id).value = '');
+  const msg = document.getElementById('pwd-msg');
+  msg.textContent = ''; msg.className = 'modal-msg';
+  document.getElementById('pwd-modal').classList.remove('hidden');
+}
+function closePwdModal() { document.getElementById('pwd-modal').classList.add('hidden'); }
+
+async function changePassword() {
+  const oldVal  = document.getElementById('pwd-old').value;
+  const newVal  = document.getElementById('pwd-new').value;
+  const confirm = document.getElementById('pwd-confirm').value;
+  const msg     = document.getElementById('pwd-msg');
+
+  if (!await verifyPwd(oldVal)) {
+    msg.textContent = '当前密码错误'; msg.className = 'modal-msg error'; return;
+  }
+  if (newVal.length < 6) {
+    msg.textContent = '新密码至少 6 位'; msg.className = 'modal-msg error'; return;
+  }
+  if (newVal !== confirm) {
+    msg.textContent = '两次输入的新密码不一致'; msg.className = 'modal-msg error'; return;
+  }
+  localStorage.setItem(PWD_HASH_KEY, await sha256(newVal));
+  msg.textContent = '密码已修改成功！'; msg.className = 'modal-msg success';
+  setTimeout(closePwdModal, 1200);
+}
+
+// Enter key on login
+document.getElementById('login-pwd').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ══════════════ DATA LAYER ══════════════
 const KEY = { income: 'ge21_income', expense: 'ge21_expense' };
 const load = k => JSON.parse(localStorage.getItem(KEY[k]) || '[]');
 const save = (k, d) => localStorage.setItem(KEY[k], JSON.stringify(d));
 
-// ── Tab switching ──
+// ══════════════ TAB SWITCHING ══════════════
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -424,7 +570,7 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ── Form helpers ──
+// ══════════════ FORM HELPERS ══════════════
 function getField(type, id) { return document.getElementById((type === 'income' ? 'in-' : 'ex-') + id); }
 
 function addRecord(type) {
@@ -434,8 +580,8 @@ function addRecord(type) {
   const amount = parseFloat(getField(type, 'amount').value);
   const remark = getField(type, 'remark').value.trim();
 
-  if (!date)            return alert('请填写日期');
-  if (!person)          return alert('请填写' + (type === 'income' ? '出资人' : '支出对象'));
+  if (!date)   return alert('请填写日期');
+  if (!person) return alert('请填写' + (type === 'income' ? '出资人' : '支出对象'));
   if (isNaN(amount) || amount <= 0) return alert('请填写正确金额');
 
   const data = load(type);
@@ -448,9 +594,11 @@ function addRecord(type) {
 }
 
 function clearForm(type) {
+  const today = new Date().toISOString().slice(0, 10);
   ['date','type','person','amount','remark'].forEach(f => {
     const el = getField(type, f);
     if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else if (f === 'date') el.value = today;
     else el.value = '';
   });
 }
@@ -462,14 +610,14 @@ function deleteRecord(type, id) {
   updateSummary(type);
 }
 
-// ── Render table ──
+// ══════════════ RENDER TABLE ══════════════
 function renderTable(type) {
   const prefix = type === 'income' ? 'in-' : 'ex-';
   const search = (document.getElementById(prefix + 'search').value || '').toLowerCase();
   const filter = document.getElementById(prefix + 'filter').value;
-  const cls    = type === 'income' ? 'income' : 'expense';
+  const cls    = type;
 
-  let rows = load(type).filter(r => {
+  const rows = load(type).filter(r => {
     const matchSearch = !search || r.person.toLowerCase().includes(search) || r.remark.toLowerCase().includes(search);
     const matchFilter = !filter || r.type === filter;
     return matchSearch && matchFilter;
@@ -505,20 +653,20 @@ function renderTable(type) {
   `;
 }
 
-// ── Summary cards ──
+// ══════════════ SUMMARY CARDS ══════════════
 function updateSummary(type) {
-  const data = load(type);
-  const total = data.reduce((s, r) => s + r.amount, 0);
+  const total = load(type).reduce((s, r) => s + r.amount, 0);
+  const count = load(type).length;
   if (type === 'income') {
     document.getElementById('total-income').textContent = '¥' + total.toFixed(2);
-    document.getElementById('total-income-count').textContent = data.length;
+    document.getElementById('total-income-count').textContent = count;
   } else {
     document.getElementById('total-expense').textContent = '¥' + total.toFixed(2);
-    document.getElementById('total-expense-count').textContent = data.length;
+    document.getElementById('total-expense-count').textContent = count;
   }
 }
 
-// ── CSV download ──
+// ══════════════ CSV DOWNLOAD ══════════════
 function downloadCSV(type) {
   const data = load(type);
   if (data.length === 0) { alert('暂无数据可下载'); return; }
@@ -550,8 +698,8 @@ function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Init ──
-(function init() {
+// ══════════════ APP INIT ══════════════
+function appInit() {
   const today = new Date().toISOString().slice(0, 10);
   document.getElementById('in-date').value = today;
   document.getElementById('ex-date').value = today;
@@ -559,7 +707,16 @@ function esc(s) {
   renderTable('expense');
   updateSummary('income');
   updateSummary('expense');
-})();
+}
+
+// ══════════════ BOOT ══════════════
+initPwd().then(() => {
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    appInit();
+  }
+});
 </script>
 </body>
 </html>
