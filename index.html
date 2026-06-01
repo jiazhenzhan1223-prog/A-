@@ -446,11 +446,12 @@
   <div class="modal-box">
     <h3>⚙ AI 图片识别设置</h3>
     <div class="form-row">
-      <label>Google Gemini API Key</label>
-      <input type="text" id="api-key-input" placeholder="AIza..." />
+      <label>Kimi API Key（可选，不填使用共享密钥）</label>
+      <input type="text" id="api-key-input" placeholder="sk-..." />
       <p class="modal-hint">
-        免费获取：访问 <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>
-        → Create API key → 复制粘贴到此处。<br>Key 仅保存在本地浏览器，不会上传。
+        已内置共享密钥，无需配置即可使用 AI 识图。<br>
+        如需使用自己的密钥，访问 <a href="https://platform.moonshot.cn" target="_blank">platform.moonshot.cn</a>
+        获取，填入后将优先使用。Key 仅保存在本地浏览器。
       </p>
     </div>
     <div class="modal-msg" id="api-msg"></div>
@@ -902,17 +903,24 @@ async function changePassword() {
 // ═══════════════════════════════════════
 // API KEY
 // ═══════════════════════════════════════
-const API_STORE = 'ge21_gemini_key';
+const API_STORE = 'ge21_ai_key';
+const DEFAULT_AI_KEY = 'sk-5MszggJJjHmearDyVJLWpOZu7YvCPPu4tSmxyJ9GXmeIjqd9';
+function getApiKey() { return localStorage.getItem(API_STORE) || DEFAULT_AI_KEY; }
 function openApi() {
   document.getElementById('api-key-input').value = localStorage.getItem(API_STORE) || '';
-  setMsg('api-msg','','');
+  setMsg('api-msg', localStorage.getItem(API_STORE) ? '' : '当前使用共享密钥', 'success');
   document.getElementById('api-modal').classList.remove('hidden');
 }
 function saveApiKey() {
   const v = document.getElementById('api-key-input').value.trim();
-  if (!v) return setMsg('api-msg','请输入 API Key','error');
+  if (!v) {
+    localStorage.removeItem(API_STORE);
+    setMsg('api-msg','已恢复使用共享密钥','success');
+    setTimeout(() => document.getElementById('api-modal').classList.add('hidden'), 900);
+    return;
+  }
   localStorage.setItem(API_STORE, v);
-  setMsg('api-msg','已保存！','success');
+  setMsg('api-msg','已保存个人密钥！','success');
   setTimeout(() => document.getElementById('api-modal').classList.add('hidden'), 900);
 }
 
@@ -1117,18 +1125,12 @@ async function processImg(file) {
   preEl.classList.add('show');
   zone.classList.add('has-img');
 
-  const apiKey = localStorage.getItem(API_STORE);
-  if (!apiKey) {
-    statusEl.className = 'img-status error';
-    statusEl.innerHTML = '⚠ 未设置 API Key，点右上角 ⚙ AI 配置';
-    return;
-  }
   statusEl.className = 'img-status loading';
   statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
 
   try {
     const b64 = await toBase64(file);
-    const res = await callGemini(b64, file.type);
+    const res = await callKimi(b64, file.type);
     fillEntry(res);
     statusEl.className = 'img-status done';
     statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
@@ -1147,7 +1149,7 @@ function toBase64(file) {
   });
 }
 
-async function callGemini(b64, mime) {
+async function callKimi(b64, mime) {
   const today = new Date().toISOString().slice(0,10);
   const isInc = currentDir === 'income';
   const typeOpt = TYPE_OPTS[currentDir].join('、');
@@ -1156,24 +1158,32 @@ async function callGemini(b64, mime) {
 {"date":"YYYY-MM-DD（图中日期，无则用${today}）","amount":数字金额不含符号,"person":"${isInc?'付款方姓名':'收款方或商家'}，无则空字符串","type":"从[${typeOpt}]选一个","remark":"简短摘要"}
 若无法识别金额，amount 填 null。`;
 
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${localStorage.getItem(API_STORE)}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime, data: b64 } }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
-      })
-    }
-  );
+  const resp = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getApiKey()}`
+    },
+    body: JSON.stringify({
+      model: 'moonshot-v1-vision-preview',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
+          { type: 'text', text: prompt }
+        ]
+      }],
+      temperature: 0.1,
+      max_tokens: 256
+    })
+  });
   if (!resp.ok) {
     const e = await resp.json().catch(() => ({}));
     throw new Error(e.error?.message || `HTTP ${resp.status}`);
   }
   const data = await resp.json();
-  const txt  = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim()
-                 .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
+  const txt = (data.choices?.[0]?.message?.content || '').trim()
+                .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
   return JSON.parse(txt);
 }
 
@@ -1855,18 +1865,12 @@ async function processRunImg(file) {
   preEl.classList.add('show');
   zone.classList.add('has-img');
 
-  const apiKey = localStorage.getItem(API_STORE);
-  if (!apiKey) {
-    statusEl.className = 'img-status error';
-    statusEl.innerHTML = '⚠ 未设置 API Key，点右上角 ⚙ AI 配置';
-    return;
-  }
   statusEl.className = 'img-status loading';
   statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
 
   try {
     const b64 = await toBase64(file);
-    const res = await callGeminiRun(b64, file.type);
+    const res = await callKimiRun(b64, file.type);
     fillRunEntry(res);
     statusEl.className = 'img-status done';
     statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
@@ -1876,30 +1880,38 @@ async function processRunImg(file) {
   }
 }
 
-async function callGeminiRun(b64, mime) {
+async function callKimiRun(b64, mime) {
   const today = new Date().toISOString().slice(0,10);
   const prompt = `请分析这张运动截图（可能是跑步APP截图、运动手表截图、健康APP记录等）。
 提取其中的跑步/运动数据，只返回如下纯 JSON，不要加代码块标记：
 {"name":"跑者姓名（无则空字符串）","date":"YYYY-MM-DD（图中日期，无则用${today}）","distance":数字公里数(必须是数字),"elevation":整数爬升米数(无则0),"note":"活动名称或简短摘要"}
 若无法识别距离，distance 填 null。`;
 
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${localStorage.getItem(API_STORE)}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime, data: b64 } }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
-      })
-    }
-  );
+  const resp = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getApiKey()}`
+    },
+    body: JSON.stringify({
+      model: 'moonshot-v1-vision-preview',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
+          { type: 'text', text: prompt }
+        ]
+      }],
+      temperature: 0.1,
+      max_tokens: 256
+    })
+  });
   if (!resp.ok) {
     const e = await resp.json().catch(()=>({}));
     throw new Error(e.error?.message || `HTTP ${resp.status}`);
   }
   const data = await resp.json();
-  const txt = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim()
+  const txt = (data.choices?.[0]?.message?.content || '').trim()
                 .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
   return JSON.parse(txt);
 }
