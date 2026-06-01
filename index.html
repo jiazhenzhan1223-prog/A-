@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>戈21 A+ 募集资金管理</title>
+  <title>戈21 A+</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -15,6 +15,8 @@
       --expense-light: #fde8e8;
       --balance: #7e3af2;
       --balance-light: #edebfe;
+      --run: #0ea5e9;
+      --run-light: #e0f2fe;
       --border: #e5e7eb;
       --text: #111827;
       --muted: #6b7280;
@@ -91,14 +93,25 @@
 
     header {
       background: var(--primary); color: #fff;
-      padding: 0 20px; display: flex; align-items: center; gap: 8px; height: 52px;
+      padding: 0 12px; display: flex; align-items: center; gap: 6px; height: 52px;
       box-shadow: 0 2px 4px rgba(0,0,0,.15);
     }
-    header h1 { font-size: 16px; font-weight: 700; flex: 1; white-space: nowrap; }
+    header h1 { font-size: 15px; font-weight: 700; white-space: nowrap; }
+    .tab-nav {
+      flex: 1; display: flex; background: rgba(255,255,255,.15);
+      border-radius: 8px; padding: 3px; gap: 2px; margin: 0 6px;
+    }
+    .tab-btn {
+      flex: 1; padding: 5px 10px; border: none; background: none; border-radius: 6px;
+      font-size: 13px; font-weight: 600; cursor: pointer; color: rgba(255,255,255,.7);
+      transition: all .15s; white-space: nowrap;
+    }
+    .tab-btn.active { background: rgba(255,255,255,.25); color: #fff; }
+    .tab-btn:hover:not(.active) { color: #fff; }
     .hbtn {
       background: rgba(255,255,255,.18); color: #fff;
       border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
-      padding: 5px 10px; font-size: 12px; cursor: pointer;
+      padding: 5px 8px; font-size: 12px; cursor: pointer;
       white-space: nowrap; transition: background .15s;
     }
     .hbtn:hover { background: rgba(255,255,255,.28); }
@@ -173,12 +186,9 @@
     .tx-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .tx-dot.income  { background: var(--income); }
     .tx-dot.expense { background: var(--expense); }
-    .tx-main {}
     .tx-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .tx-person { font-size: 15px; font-weight: 600; }
-    .tx-badge {
-      font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500;
-    }
+    .tx-badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
     .tx-badge.income  { background: var(--income-light);  color: var(--income); }
     .tx-badge.expense { background: var(--expense-light); color: var(--expense); }
     .tx-bottom { font-size: 12px; color: var(--muted); margin-top: 3px; }
@@ -196,14 +206,10 @@
       border-radius: 5px; cursor: pointer; background: var(--expense-light); color: var(--expense);
     }
     .tx-del-btn:hover { background: #fca5a5; }
-
-    .tx-empty {
-      text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px;
-    }
+    .tx-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px; }
     .tx-summary {
       text-align: center; padding: 12px; font-size: 13px; color: var(--muted);
-      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-      margin-top: 8px;
+      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 8px;
     }
 
     /* ══ FORM in modal ══ */
@@ -272,18 +278,72 @@
     }
     .modal-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
     .modal-box .form-row { margin-bottom: 12px; }
-    .modal-box .form-row input {
-      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;
-    }
+    .modal-box .form-row input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
     .modal-box .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
     .modal-box .btn-sm { padding: 8px 18px; font-size: 14px; }
 
+    /* ══ RUNNING PAGE ══ */
+    #page-run { display: none; }
+    .run-sum-bar {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px; padding: 16px; max-width: 700px; margin: 0 auto;
+    }
+    .run-card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); text-align: center; }
+    .run-card.runners  { border-top: 3px solid var(--run); }
+    .run-card.distance { border-top: 3px solid var(--income); }
+    .run-card.topscore { border-top: 3px solid #f59e0b; }
+    .run-card.runners  .sum-value { color: var(--run); }
+    .run-card.distance .sum-value { color: var(--income); }
+    .run-card.topscore .sum-value { color: #f59e0b; font-size: 15px; }
+    .run-ctrl {
+      max-width: 700px; margin: 0 auto; padding: 0 16px 12px;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    }
+    .run-table-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 16px; overflow-x: auto; }
+    .run-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .run-table th { background: var(--run); color: #fff; padding: 10px 12px; font-size: 13px; font-weight: 600; text-align: left; white-space: nowrap; }
+    .run-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .run-table tr:last-child td { border-bottom: none; }
+    .run-table tr:hover td { background: var(--run-light); }
+    .run-rank { font-weight: 700; }
+    .run-eff { font-weight: 700; color: var(--income); }
+    .run-detail-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 16px; }
+    .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .5px; }
+    .run-item {
+      background: var(--card); border-radius: var(--radius); padding: 12px 16px;
+      box-shadow: var(--shadow); display: grid; grid-template-columns: 1fr auto auto;
+      gap: 10px; align-items: center; margin-bottom: 8px;
+    }
+    .run-name { font-size: 15px; font-weight: 600; }
+    .run-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .run-dist { font-size: 15px; font-weight: 700; color: var(--income); white-space: nowrap; text-align: right; }
+    .run-dist small { font-size: 11px; color: var(--muted); display: block; }
+    .run-actions { display: flex; flex-direction: column; gap: 4px; }
+    .run-edit-btn { padding: 4px 10px; font-size: 12px; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; background: #fff; color: var(--primary); }
+    .run-edit-btn:hover { background: var(--primary-light); }
+    .run-del-btn  { padding: 4px 10px; font-size: 12px; border: none; border-radius: 5px; cursor: pointer; background: var(--expense-light); color: var(--expense); }
+    .run-del-btn:hover { background: #fca5a5; }
+    .run-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px; }
+    .groups-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 32px; }
+    .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+    .group-card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+    .group-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+    .group-member { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #f3f4f6; }
+    .group-member:last-child { border-bottom: none; }
+    .run-eff-preview {
+      background: var(--income-light); border: 1px solid var(--income); border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; color: var(--income); font-weight: 600;
+      margin-bottom: 14px; text-align: center;
+    }
+
     @media (max-width: 480px) {
-      .summary-bar { gap: 8px; padding: 12px; }
+      .summary-bar, .run-sum-bar { gap: 8px; padding: 12px; }
       .sum-value { font-size: 16px; }
       .tx-item { grid-template-columns: auto 1fr auto auto; gap: 8px; }
       .tx-amount { font-size: 15px; }
-      header h1 { font-size: 14px; }
+      header h1 { font-size: 13px; }
+      .tab-btn { padding: 4px 8px; font-size: 12px; }
+      .run-table th, .run-table td { padding: 8px; font-size: 12px; }
     }
   </style>
 </head>
@@ -342,19 +402,15 @@
   </div>
 </div>
 
-<!-- ══ RECORD ENTRY MODAL ══ -->
+<!-- ══ FUND RECORD ENTRY MODAL ══ -->
 <div id="entry-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title" id="entry-modal-title">记一笔</div>
-
-    <!-- income / expense toggle -->
     <div class="dir-toggle">
       <button class="dir-btn income active" id="dir-income" onclick="setDir('income')">💰 收入</button>
       <button class="dir-btn expense" id="dir-expense" onclick="setDir('expense')">💸 支出</button>
     </div>
-
-    <!-- image upload -->
     <div class="img-zone" id="img-zone"
          ondrop="handleDrop(event)" ondragover="handleDragOver(event)"
          ondragleave="handleDragLeave(event)" onclick="triggerImgInput()">
@@ -371,8 +427,6 @@
       </div>
     </div>
     <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleFileInput(event)" />
-
-    <!-- fields -->
     <div class="form-row-2">
       <div class="form-row" style="margin-bottom:0">
         <label>日期 *</label>
@@ -409,14 +463,13 @@
   </div>
 </div>
 
-<!-- ══ EDIT MODAL ══ -->
+<!-- ══ FUND EDIT MODAL ══ -->
 <div id="edit-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title">编辑记录</div>
     <input type="hidden" id="edit-id" />
     <input type="hidden" id="edit-dir" />
-
     <div class="form-row-2">
       <div class="form-row" style="margin-bottom:0">
         <label>日期 *</label>
@@ -448,54 +501,203 @@
   </div>
 </div>
 
+<!-- ══ RUN ENTRY MODAL ══ -->
+<div id="run-entry-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">记跑量</div>
+    <div class="img-zone" id="run-img-zone"
+         ondrop="handleRunDrop(event)" ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)" onclick="triggerRunImgInput()">
+      <div class="img-idle" id="run-img-idle">
+        <div class="icon">🏃</div>
+        <p>点击或拖拽上传运动截图<br><small>支持跑步APP截图（AI自动识别）</small></p>
+      </div>
+      <div class="img-preview" id="run-img-preview">
+        <img class="img-thumb" id="run-img-thumb" />
+        <div class="img-info">
+          <div class="img-status" id="run-img-status"></div>
+          <span class="img-clear" onclick="clearRunImg(event)">✕ 清除图片</span>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="run-img-input" accept="image/*" style="display:none" onchange="handleRunFileInput(event)" />
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>姓名 *</label>
+        <input type="text" id="r-name" placeholder="跑者姓名" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>日期 *</label>
+        <input type="date" id="r-date" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>跑量（km）*</label>
+        <input type="number" id="r-dist" placeholder="0.0" min="0" step="0.01" oninput="updateRunPreview()" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>爬升（m）</label>
+        <input type="number" id="r-elev" placeholder="0" min="0" step="1" oninput="updateRunPreview()" />
+      </div>
+    </div>
+    <div id="run-eff-preview" class="run-eff-preview" style="display:none"></div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="r-note" placeholder="活动名称或备注..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeRunEntry()">取消</button>
+      <button class="btn btn-primary" onclick="saveRun()" style="background:var(--run)">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RUN EDIT MODAL ══ -->
+<div id="run-edit-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">编辑跑量记录</div>
+    <input type="hidden" id="re-id" />
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>姓名 *</label>
+        <input type="text" id="re-name" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>日期 *</label>
+        <input type="date" id="re-date" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>跑量（km）*</label>
+        <input type="number" id="re-dist" min="0" step="0.01" oninput="updateRunEditPreview()" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>爬升（m）</label>
+        <input type="number" id="re-elev" min="0" step="1" oninput="updateRunEditPreview()" />
+      </div>
+    </div>
+    <div id="run-edit-preview" class="run-eff-preview" style="display:none"></div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="re-note"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeRunEdit()">取消</button>
+      <button class="btn btn-primary" onclick="saveRunEdit()" style="background:var(--run)">保存修改</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ APP ══ -->
 <div id="app">
   <header>
-    <h1>⛰ 戈21 A+ 资金管理</h1>
+    <h1>⛰ 戈21 A+</h1>
+    <div class="tab-nav">
+      <button class="tab-btn active" id="tab-fund" onclick="switchPage('fund')">💰 资金</button>
+      <button class="tab-btn"        id="tab-run"  onclick="switchPage('run')">🏃 跑量</button>
+    </div>
     <button class="hbtn" onclick="openApi()">⚙ AI</button>
-    <button class="hbtn" onclick="openPwd()">🔑 改密码</button>
+    <button class="hbtn" onclick="openPwd()">🔑 密码</button>
     <button class="hbtn" onclick="doLogout()">退出</button>
   </header>
 
-  <!-- Summary -->
-  <div class="summary-bar">
-    <div class="sum-card income">
-      <div class="sum-label">总收入</div>
-      <div class="sum-value" id="s-income">¥0.00</div>
-    </div>
-    <div class="sum-card balance">
-      <div class="sum-label">余　额</div>
-      <div class="sum-value" id="s-balance">¥0.00</div>
-    </div>
-    <div class="sum-card expense">
-      <div class="sum-label">总支出</div>
-      <div class="sum-value" id="s-expense">¥0.00</div>
-    </div>
-  </div>
-
-  <!-- Record button -->
-  <div class="record-btn-wrap">
-    <button class="record-btn" onclick="openEntry()">
-      <span style="font-size:22px">＋</span> 记一笔
-    </button>
-  </div>
-
-  <!-- List -->
-  <div class="list-wrap">
-    <div class="filter-bar">
-      <div class="seg-tabs">
-        <button class="seg-btn active" data-seg="all"     onclick="setSeg('all')">全部</button>
-        <button class="seg-btn"        data-seg="income"  onclick="setSeg('income')">收入</button>
-        <button class="seg-btn"        data-seg="expense" onclick="setSeg('expense')">支出</button>
+  <!-- ══ FUND PAGE ══ -->
+  <div id="page-fund">
+    <div class="summary-bar">
+      <div class="sum-card income">
+        <div class="sum-label">总收入</div>
+        <div class="sum-value" id="s-income">¥0.00</div>
       </div>
-      <input class="search-input" id="search" type="text" placeholder="搜索经办人/备注..." oninput="renderList()" />
-      <select class="type-filter" id="type-filter" onchange="renderList()">
-        <option value="">全部类型</option>
-      </select>
-      <button class="dl-btn" onclick="downloadCSV()">⬇ CSV</button>
+      <div class="sum-card balance">
+        <div class="sum-label">余　额</div>
+        <div class="sum-value" id="s-balance">¥0.00</div>
+      </div>
+      <div class="sum-card expense">
+        <div class="sum-label">总支出</div>
+        <div class="sum-value" id="s-expense">¥0.00</div>
+      </div>
+    </div>
+    <div class="record-btn-wrap">
+      <button class="record-btn" onclick="openEntry()">
+        <span style="font-size:22px">＋</span> 记一笔
+      </button>
+    </div>
+    <div class="list-wrap">
+      <div class="filter-bar">
+        <div class="seg-tabs">
+          <button class="seg-btn active" data-seg="all"     onclick="setSeg('all')">全部</button>
+          <button class="seg-btn"        data-seg="income"  onclick="setSeg('income')">收入</button>
+          <button class="seg-btn"        data-seg="expense" onclick="setSeg('expense')">支出</button>
+        </div>
+        <input class="search-input" id="search" type="text" placeholder="搜索经办人/备注..." oninput="renderList()" />
+        <select class="type-filter" id="type-filter" onchange="renderList()">
+          <option value="">全部类型</option>
+        </select>
+        <button class="dl-btn" onclick="downloadCSV()">⬇ CSV</button>
+      </div>
+      <div class="tx-list" id="tx-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ RUN PAGE ══ -->
+  <div id="page-run">
+    <div class="run-sum-bar">
+      <div class="run-card runners">
+        <div class="sum-label">参与人数</div>
+        <div class="sum-value" id="rs-runners">0</div>
+      </div>
+      <div class="run-card distance">
+        <div class="sum-label">总有效跑量</div>
+        <div class="sum-value" id="rs-total">0 km</div>
+      </div>
+      <div class="run-card topscore">
+        <div class="sum-label">排名第一</div>
+        <div class="sum-value" id="rs-top">-</div>
+      </div>
     </div>
 
-    <div class="tx-list" id="tx-list"></div>
+    <div class="record-btn-wrap">
+      <button class="record-btn" onclick="openRunEntry()" style="background:var(--run);box-shadow:0 4px 14px rgba(14,165,233,.4)">
+        <span style="font-size:22px">＋</span> 记跑量
+      </button>
+    </div>
+
+    <div class="run-ctrl">
+      <div class="seg-tabs">
+        <button class="seg-btn active" data-rp="all"   onclick="setRunPeriod('all')">全部</button>
+        <button class="seg-btn"        data-rp="month" onclick="setRunPeriod('month')">本月</button>
+        <button class="seg-btn"        data-rp="week"  onclick="setRunPeriod('week')">本周</button>
+      </div>
+      <button class="dl-btn" onclick="exportRunTable()" style="background:var(--balance)">📋 导出排行</button>
+      <button class="dl-btn" onclick="toggleGroups()" id="groups-toggle-btn" style="background:#6b7280">👥 蛇形分组</button>
+    </div>
+
+    <div class="run-table-wrap">
+      <div id="run-leaderboard"></div>
+    </div>
+
+    <div class="groups-wrap" id="groups-wrap" style="display:none">
+      <div class="section-title">蛇形分组</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;max-width:300px">
+        <div class="form-row" style="margin-bottom:0">
+          <label>分组数量</label>
+          <input type="number" id="group-count" value="4" min="2" max="10" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;width:100%" />
+        </div>
+        <div class="form-row" style="margin-bottom:0;display:flex;align-items:flex-end">
+          <button class="btn btn-primary" onclick="generateGroups()" style="background:var(--run);padding:9px 14px;font-size:13px">重新生成</button>
+        </div>
+      </div>
+      <div class="groups-grid" id="groups-grid"></div>
+    </div>
+
+    <div class="run-detail-wrap">
+      <div class="section-title">明细记录</div>
+      <div id="run-detail-list"></div>
+    </div>
   </div>
 </div>
 
@@ -586,7 +788,20 @@ function setMsg(id, text, cls) {
 }
 
 // ═══════════════════════════════════════
-// DATA
+// PAGE SWITCHING
+// ═══════════════════════════════════════
+let currentPage = 'fund';
+function switchPage(page) {
+  currentPage = page;
+  document.getElementById('page-fund').style.display = page === 'fund' ? '' : 'none';
+  document.getElementById('page-run').style.display  = page === 'run'  ? '' : 'none';
+  document.getElementById('tab-fund').classList.toggle('active', page === 'fund');
+  document.getElementById('tab-run').classList.toggle('active',  page === 'run');
+  if (page === 'run') { updateRunSummary(); renderLeaderboard(); renderRunDetail(); }
+}
+
+// ═══════════════════════════════════════
+// FUND DATA
 // ═══════════════════════════════════════
 const DB_KEY = 'ge21_records';
 function loadAll() { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); }
@@ -598,7 +813,7 @@ const TYPE_OPTS = {
 };
 
 // ═══════════════════════════════════════
-// ENTRY MODAL
+// FUND ENTRY MODAL
 // ═══════════════════════════════════════
 let currentDir = 'income';
 
@@ -618,11 +833,9 @@ function setDir(dir) {
   currentDir = dir;
   document.getElementById('dir-income').classList.toggle('active', dir === 'income');
   document.getElementById('dir-expense').classList.toggle('active', dir === 'expense');
-  // update type options
   const sel = document.getElementById('f-type');
   sel.innerHTML = TYPE_OPTS[dir].map(o => `<option value="${o}">${o}</option>`).join('');
-  document.getElementById('type-label').textContent   = dir === 'income' ? '收入类型' : '支出类型';
-  document.getElementById('person-label').textContent = dir === 'income' ? '经办人 *' : '经办人 *';
+  document.getElementById('type-label').textContent = dir === 'income' ? '收入类型' : '支出类型';
 }
 
 function clearEntryForm() {
@@ -655,7 +868,7 @@ function saveRecord() {
 }
 
 // ═══════════════════════════════════════
-// EDIT MODAL
+// FUND EDIT MODAL
 // ═══════════════════════════════════════
 function openEdit(id) {
   const rec = loadAll().find(r => r.id === id);
@@ -666,7 +879,7 @@ function openEdit(id) {
   document.getElementById('e-amount').value    = rec.amount;
   document.getElementById('e-person').value    = rec.person;
   document.getElementById('e-remark').value    = rec.remark;
-  document.getElementById('e-type-label').textContent   = rec.dir === 'income' ? '收入类型' : '支出类型';
+  document.getElementById('e-type-label').textContent = rec.dir === 'income' ? '收入类型' : '支出类型';
   document.getElementById('e-person-label').textContent = '经办人 *';
   const sel = document.getElementById('e-type');
   sel.innerHTML = TYPE_OPTS[rec.dir].map(o => `<option value="${o}"${o===rec.type?' selected':''}>${o}</option>`).join('');
@@ -704,7 +917,7 @@ function deleteRecord(id) {
 }
 
 // ═══════════════════════════════════════
-// IMAGE UPLOAD & GEMINI
+// FUND IMAGE UPLOAD & GEMINI
 // ═══════════════════════════════════════
 function triggerImgInput() {
   if (document.getElementById('img-zone').classList.contains('has-img')) return;
@@ -713,8 +926,7 @@ function triggerImgInput() {
 function handleDragOver(e)  { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
 function handleDrop(e) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   const f = e.dataTransfer.files[0];
   if (f && f.type.startsWith('image/')) processImg(f);
 }
@@ -732,10 +944,10 @@ function clearImg(e) {
 }
 
 async function processImg(file) {
-  const zone     = document.getElementById('img-zone');
-  const idleEl   = document.getElementById('img-idle');
-  const preEl    = document.getElementById('img-preview');
-  const thumb    = document.getElementById('img-thumb');
+  const zone = document.getElementById('img-zone');
+  const idleEl = document.getElementById('img-idle');
+  const preEl = document.getElementById('img-preview');
+  const thumb = document.getElementById('img-thumb');
   const statusEl = document.getElementById('img-status');
 
   thumb.src = URL.createObjectURL(file);
@@ -825,13 +1037,13 @@ function fillEntry(r) {
 }
 
 // ═══════════════════════════════════════
-// RENDER LIST
+// FUND RENDER LIST
 // ═══════════════════════════════════════
 let currentSeg = 'all';
 
 function setSeg(seg) {
   currentSeg = seg;
-  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.seg === seg));
+  document.querySelectorAll('.seg-btn[data-seg]').forEach(b => b.classList.toggle('active', b.dataset.seg === seg));
   updateTypeFilter();
   renderList();
 }
@@ -893,7 +1105,7 @@ function renderList() {
 }
 
 // ═══════════════════════════════════════
-// SUMMARY
+// FUND SUMMARY
 // ═══════════════════════════════════════
 function updateSummary() {
   const all = loadAll();
@@ -929,6 +1141,390 @@ function cv(v) { const s=String(v??''); return /[,"\n]/.test(s)?`"${s.replace(/"
 function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ═══════════════════════════════════════
+// RUNNING DATA
+// ═══════════════════════════════════════
+const RUN_KEY = 'ge21_runs';
+function loadRuns() { return JSON.parse(localStorage.getItem(RUN_KEY) || '[]'); }
+function saveRuns(d) { localStorage.setItem(RUN_KEY, JSON.stringify(d)); }
+function effRun(dist, elev) { return +(dist + (elev || 0) / 100).toFixed(2); }
+
+// ═══════════════════════════════════════
+// RUN ENTRY MODAL
+// ═══════════════════════════════════════
+function openRunEntry() {
+  document.getElementById('r-date').value = new Date().toISOString().slice(0,10);
+  ['r-name','r-dist','r-elev','r-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('run-eff-preview').style.display = 'none';
+  clearRunImg({ stopPropagation: ()=>{} });
+  document.getElementById('run-entry-modal').classList.remove('hidden');
+}
+function closeRunEntry() { document.getElementById('run-entry-modal').classList.add('hidden'); }
+
+function updateRunPreview() {
+  const dist = parseFloat(document.getElementById('r-dist').value) || 0;
+  const elev = parseFloat(document.getElementById('r-elev').value) || 0;
+  const el = document.getElementById('run-eff-preview');
+  if (dist > 0) {
+    el.textContent = `有效跑量 = ${dist} + ${elev}÷100 = ${effRun(dist, elev)} km`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function saveRun() {
+  const name = document.getElementById('r-name').value.trim();
+  const date = document.getElementById('r-date').value.trim();
+  const dist = parseFloat(document.getElementById('r-dist').value);
+  const elev = parseFloat(document.getElementById('r-elev').value) || 0;
+  const note = document.getElementById('r-note').value.trim();
+  if (!name)                        return alert('请填写姓名');
+  if (!date)                        return alert('请填写日期');
+  if (isNaN(dist) || dist <= 0)     return alert('请填写正确跑量');
+  const runs = loadRuns();
+  runs.push({ id: Date.now(), name, date, distance: dist, elevation: elev, note });
+  runs.sort((a,b) => b.date.localeCompare(a.date));
+  saveRuns(runs);
+  closeRunEntry();
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+// ═══════════════════════════════════════
+// RUN EDIT MODAL
+// ═══════════════════════════════════════
+function openRunEdit(id) {
+  const run = loadRuns().find(r => r.id === id);
+  if (!run) return;
+  document.getElementById('re-id').value   = id;
+  document.getElementById('re-name').value = run.name;
+  document.getElementById('re-date').value = run.date;
+  document.getElementById('re-dist').value = run.distance;
+  document.getElementById('re-elev').value = run.elevation || 0;
+  document.getElementById('re-note').value = run.note || '';
+  updateRunEditPreview();
+  document.getElementById('run-edit-modal').classList.remove('hidden');
+}
+function closeRunEdit() { document.getElementById('run-edit-modal').classList.add('hidden'); }
+
+function updateRunEditPreview() {
+  const dist = parseFloat(document.getElementById('re-dist').value) || 0;
+  const elev = parseFloat(document.getElementById('re-elev').value) || 0;
+  const el = document.getElementById('run-edit-preview');
+  if (dist > 0) {
+    el.textContent = `有效跑量 = ${dist} + ${elev}÷100 = ${effRun(dist, elev)} km`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function saveRunEdit() {
+  const id   = parseInt(document.getElementById('re-id').value);
+  const name = document.getElementById('re-name').value.trim();
+  const date = document.getElementById('re-date').value.trim();
+  const dist = parseFloat(document.getElementById('re-dist').value);
+  const elev = parseFloat(document.getElementById('re-elev').value) || 0;
+  const note = document.getElementById('re-note').value.trim();
+  if (!name)                    return alert('请填写姓名');
+  if (!date)                    return alert('请填写日期');
+  if (isNaN(dist) || dist <= 0) return alert('请填写正确跑量');
+  const runs = loadRuns();
+  const run = runs.find(r => r.id === id);
+  if (run) { run.name = name; run.date = date; run.distance = dist; run.elevation = elev; run.note = note; }
+  runs.sort((a,b) => b.date.localeCompare(a.date));
+  saveRuns(runs);
+  closeRunEdit();
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+function deleteRun(id) {
+  if (!confirm('确定删除该跑量记录？')) return;
+  saveRuns(loadRuns().filter(r => r.id !== id));
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+// ═══════════════════════════════════════
+// RUN PERIOD FILTER
+// ═══════════════════════════════════════
+let runPeriod = 'all';
+function setRunPeriod(p) {
+  runPeriod = p;
+  document.querySelectorAll('.seg-btn[data-rp]').forEach(b => b.classList.toggle('active', b.dataset.rp === p));
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+function filterByPeriod(runs) {
+  if (runPeriod === 'all') return runs;
+  const now = new Date();
+  if (runPeriod === 'month') {
+    const ym = now.toISOString().slice(0,7);
+    return runs.filter(r => r.date.slice(0,7) === ym);
+  }
+  if (runPeriod === 'week') {
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const monStr = mon.toISOString().slice(0,10);
+    const sunStr = sun.toISOString().slice(0,10);
+    return runs.filter(r => r.date >= monStr && r.date <= sunStr);
+  }
+  return runs;
+}
+
+function buildLeaderboard(runs) {
+  const map = {};
+  runs.forEach(r => {
+    if (!map[r.name]) map[r.name] = { name: r.name, count: 0, totalDist: 0, totalElev: 0, totalEff: 0 };
+    const m = map[r.name];
+    m.count++;
+    m.totalDist += r.distance;
+    m.totalElev += (r.elevation || 0);
+    m.totalEff  += effRun(r.distance, r.elevation || 0);
+  });
+  return Object.values(map).sort((a,b) => b.totalEff - a.totalEff);
+}
+
+// ═══════════════════════════════════════
+// RUN SUMMARY CARDS
+// ═══════════════════════════════════════
+function updateRunSummary() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  document.getElementById('rs-runners').textContent = lb.length;
+  const total = runs.reduce((s,r) => s + effRun(r.distance, r.elevation||0), 0);
+  document.getElementById('rs-total').textContent = total.toFixed(1) + ' km';
+  document.getElementById('rs-top').textContent = lb.length
+    ? lb[0].name + ' ' + lb[0].totalEff.toFixed(1) + 'km'
+    : '-';
+}
+
+// ═══════════════════════════════════════
+// LEADERBOARD TABLE
+// ═══════════════════════════════════════
+function renderLeaderboard() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  const el = document.getElementById('run-leaderboard');
+  if (!lb.length) {
+    el.innerHTML = '<div class="run-empty">暂无跑量记录，点击"记跑量"开始记录</div>';
+    return;
+  }
+  const medal = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span class="run-rank">${i+1}</span>`;
+  el.innerHTML = `<table class="run-table">
+    <thead><tr>
+      <th>排名</th><th>姓名</th><th>次数</th><th>跑量(km)</th><th>爬升(m)</th><th>有效跑量</th>
+    </tr></thead>
+    <tbody>${lb.map((r,i) => `<tr>
+      <td>${medal(i)}</td>
+      <td>${esc(r.name)}</td>
+      <td>${r.count}</td>
+      <td>${r.totalDist.toFixed(1)}</td>
+      <td>${r.totalElev}</td>
+      <td class="run-eff">${r.totalEff.toFixed(2)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ═══════════════════════════════════════
+// DETAIL LIST
+// ═══════════════════════════════════════
+function renderRunDetail() {
+  const runs = filterByPeriod(loadRuns());
+  const el = document.getElementById('run-detail-list');
+  if (!runs.length) { el.innerHTML = '<div class="run-empty">暂无明细记录</div>'; return; }
+  el.innerHTML = runs.map(r => `
+    <div class="run-item">
+      <div>
+        <div class="run-name">${esc(r.name)}</div>
+        <div class="run-meta">${r.date}${r.note?' · '+esc(r.note):''} · 爬升${r.elevation||0}m</div>
+      </div>
+      <div class="run-dist">
+        ${r.distance.toFixed(1)} km
+        <small>有效 ${effRun(r.distance, r.elevation||0).toFixed(2)}</small>
+      </div>
+      <div class="run-actions">
+        <button class="run-edit-btn" onclick="openRunEdit(${r.id})">编辑</button>
+        <button class="run-del-btn"  onclick="deleteRun(${r.id})">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// SNAKE-DRAFT GROUPS
+// ═══════════════════════════════════════
+let showGroups = false;
+function toggleGroups() {
+  showGroups = !showGroups;
+  const wrap = document.getElementById('groups-wrap');
+  wrap.style.display = showGroups ? '' : 'none';
+  document.getElementById('groups-toggle-btn').textContent = showGroups ? '👥 隐藏分组' : '👥 蛇形分组';
+  if (showGroups) generateGroups();
+}
+
+function generateGroups() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  const n = Math.max(2, Math.min(10, parseInt(document.getElementById('group-count').value) || 4));
+  const names = ['一','二','三','四','五','六','七','八','九','十'];
+  const groups = Array.from({length: n}, (_,i) => ({ label: `第${names[i]||i+1}组`, members: [] }));
+  lb.forEach((person, idx) => {
+    const round = Math.floor(idx / n);
+    const pos   = idx % n;
+    const gIdx  = round % 2 === 0 ? pos : n - 1 - pos;
+    groups[gIdx].members.push(person);
+  });
+  document.getElementById('groups-grid').innerHTML = groups.filter(g => g.members.length).map(g => `
+    <div class="group-card">
+      <div class="group-title">🏃 ${g.label}</div>
+      ${g.members.map(m => `
+        <div class="group-member">
+          <span>${esc(m.name)}</span>
+          <span style="color:var(--income);font-weight:600">${m.totalEff.toFixed(2)} km</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// EXPORT RUN TABLE
+// ═══════════════════════════════════════
+function exportRunTable() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  if (!lb.length) return alert('暂无数据');
+  const periodLabel = runPeriod === 'all' ? '全部' : runPeriod === 'month' ? '本月' : '本周';
+  const lines = [
+    `戈21 A+ 跑量排行 [${periodLabel}]`,
+    `生成时间：${new Date().toLocaleString('zh-CN')}`,
+    '',
+    '排名\t姓名\t次数\t跑量(km)\t爬升(m)\t有效跑量',
+    ...lb.map((r,i) => `${i+1}\t${r.name}\t${r.count}\t${r.totalDist.toFixed(1)}\t${r.totalElev}\t${r.totalEff.toFixed(2)}`)
+  ];
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(
+    () => alert('排行榜已复制到剪贴板！可直接粘贴到微信或文档。'),
+    () => {
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([text], {type:'text/plain;charset=utf-8'})),
+        download: `戈21A+_跑量排行_${new Date().toISOString().slice(0,10)}.txt`
+      });
+      a.click();
+    }
+  );
+}
+
+// ═══════════════════════════════════════
+// RUN IMAGE UPLOAD & GEMINI
+// ═══════════════════════════════════════
+function triggerRunImgInput() {
+  if (document.getElementById('run-img-zone').classList.contains('has-img')) return;
+  document.getElementById('run-img-input').click();
+}
+function handleRunDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) processRunImg(f);
+}
+function handleRunFileInput(e) {
+  if (e.target.files[0]) processRunImg(e.target.files[0]);
+  e.target.value = '';
+}
+function clearRunImg(e) {
+  e.stopPropagation();
+  document.getElementById('run-img-zone').classList.remove('has-img');
+  document.getElementById('run-img-idle').style.display = '';
+  document.getElementById('run-img-preview').classList.remove('show');
+  ['r-name','r-date','r-dist','r-elev','r-note'].forEach(id =>
+    document.getElementById(id).classList.remove('ai-filled'));
+}
+
+async function processRunImg(file) {
+  const zone = document.getElementById('run-img-zone');
+  const idleEl = document.getElementById('run-img-idle');
+  const preEl = document.getElementById('run-img-preview');
+  const thumb = document.getElementById('run-img-thumb');
+  const statusEl = document.getElementById('run-img-status');
+
+  thumb.src = URL.createObjectURL(file);
+  idleEl.style.display = 'none';
+  preEl.classList.add('show');
+  zone.classList.add('has-img');
+
+  const apiKey = localStorage.getItem(API_STORE);
+  if (!apiKey) {
+    statusEl.className = 'img-status error';
+    statusEl.innerHTML = '⚠ 未设置 API Key，点右上角 ⚙ AI 配置';
+    return;
+  }
+  statusEl.className = 'img-status loading';
+  statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
+
+  try {
+    const b64 = await toBase64(file);
+    const res = await callGeminiRun(b64, file.type);
+    fillRunEntry(res);
+    statusEl.className = 'img-status done';
+    statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
+  } catch(err) {
+    statusEl.className = 'img-status error';
+    statusEl.innerHTML = '❌ 识别失败：' + (err.message || '请检查 API Key');
+  }
+}
+
+async function callGeminiRun(b64, mime) {
+  const today = new Date().toISOString().slice(0,10);
+  const prompt = `请分析这张运动截图（可能是跑步APP截图、运动手表截图、健康APP记录等）。
+提取其中的跑步/运动数据，只返回如下纯 JSON，不要加代码块标记：
+{"name":"跑者姓名（无则空字符串）","date":"YYYY-MM-DD（图中日期，无则用${today}）","distance":数字公里数(必须是数字),"elevation":整数爬升米数(无则0),"note":"活动名称或简短摘要"}
+若无法识别距离，distance 填 null。`;
+
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${localStorage.getItem(API_STORE)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime, data: b64 } }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
+      })
+    }
+  );
+  if (!resp.ok) {
+    const e = await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message || `HTTP ${resp.status}`);
+  }
+  const data = await resp.json();
+  const txt = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim()
+                .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
+  return JSON.parse(txt);
+}
+
+function fillRunEntry(r) {
+  const set = (id, val) => {
+    if (val == null || val === '') return;
+    const el = document.getElementById(id);
+    el.value = val;
+    el.classList.add('ai-filled');
+  };
+  set('r-name', r.name);
+  set('r-date', r.date);
+  if (r.distance != null) set('r-dist', r.distance);
+  if (r.elevation != null) set('r-elev', r.elevation);
+  set('r-note', r.note);
+  updateRunPreview();
+}
+
+// ═══════════════════════════════════════
 // APP INIT
 // ═══════════════════════════════════════
 function appInit() {
@@ -938,9 +1534,9 @@ function appInit() {
 }
 
 // close modals on overlay click
-['entry-modal','edit-modal'].forEach(id => {
+['entry-modal','edit-modal','run-entry-modal','run-edit-modal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
-    if (e.target === this) { this.classList.add('hidden'); }
+    if (e.target === this) this.classList.add('hidden');
   });
 });
 
