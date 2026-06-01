@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>戈21 A+ 募集资金管理</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>戈21 A+</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -15,6 +18,8 @@
       --expense-light: #fde8e8;
       --balance: #7e3af2;
       --balance-light: #edebfe;
+      --run: #0ea5e9;
+      --run-light: #e0f2fe;
       --border: #e5e7eb;
       --text: #111827;
       --muted: #6b7280;
@@ -91,14 +96,46 @@
 
     header {
       background: var(--primary); color: #fff;
-      padding: 0 20px; display: flex; align-items: center; gap: 8px; height: 52px;
+      padding: 0 12px; display: flex; align-items: center; gap: 8px; height: 52px;
       box-shadow: 0 2px 4px rgba(0,0,0,.15);
     }
-    header h1 { font-size: 16px; font-weight: 700; flex: 1; white-space: nowrap; }
+    header h1 { font-size: 15px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .back-btn {
+      background: rgba(255,255,255,.18); color: #fff;
+      border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
+      padding: 5px 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: background .15s; flex-shrink: 0;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.28); }
+    .back-btn.hidden { display: none; }
+
+    /* ══ HOME SCREEN ══ */
+    #page-home { max-width: 480px; margin: 32px auto; padding: 0 16px 60px; }
+    .home-greeting { font-size: 22px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+    .home-sub { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 28px; }
+    .nav-card {
+      background: var(--card); border-radius: 16px; padding: 24px 20px;
+      margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      display: flex; align-items: center; gap: 18px; cursor: pointer;
+      border: 2px solid transparent; transition: transform .15s, box-shadow .15s, border-color .15s;
+      user-select: none;
+    }
+    .nav-card:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .nav-card:active { transform: translateY(0); }
+    .nav-card.fund:hover { border-color: var(--income); }
+    .nav-card.run:hover  { border-color: var(--run); }
+    .nav-icon { font-size: 46px; flex-shrink: 0; }
+    .nav-body { flex: 1; min-width: 0; }
+    .nav-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .nav-sub   { font-size: 13px; color: var(--muted); }
+    .nav-stat  { font-size: 12px; margin-top: 6px; font-weight: 600; }
+    .nav-card.fund .nav-stat { color: var(--income); }
+    .nav-card.run  .nav-stat { color: var(--run); }
+    .nav-arrow { font-size: 22px; color: #d1d5db; flex-shrink: 0; }
     .hbtn {
       background: rgba(255,255,255,.18); color: #fff;
       border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
-      padding: 5px 10px; font-size: 12px; cursor: pointer;
+      padding: 5px 8px; font-size: 12px; cursor: pointer;
       white-space: nowrap; transition: background .15s;
     }
     .hbtn:hover { background: rgba(255,255,255,.28); }
@@ -173,12 +210,9 @@
     .tx-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .tx-dot.income  { background: var(--income); }
     .tx-dot.expense { background: var(--expense); }
-    .tx-main {}
     .tx-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .tx-person { font-size: 15px; font-weight: 600; }
-    .tx-badge {
-      font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500;
-    }
+    .tx-badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
     .tx-badge.income  { background: var(--income-light);  color: var(--income); }
     .tx-badge.expense { background: var(--expense-light); color: var(--expense); }
     .tx-bottom { font-size: 12px; color: var(--muted); margin-top: 3px; }
@@ -196,14 +230,10 @@
       border-radius: 5px; cursor: pointer; background: var(--expense-light); color: var(--expense);
     }
     .tx-del-btn:hover { background: #fca5a5; }
-
-    .tx-empty {
-      text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px;
-    }
+    .tx-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px; }
     .tx-summary {
       text-align: center; padding: 12px; font-size: 13px; color: var(--muted);
-      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-      margin-top: 8px;
+      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 8px;
     }
 
     /* ══ FORM in modal ══ */
@@ -226,8 +256,37 @@
     .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
       outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.12);
     }
+    .form-row input.ai-filled { border-color: var(--income); background: #f0fdf4; }
     .form-row textarea { resize: vertical; min-height: 70px; }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+
+    /* ══ IMAGE UPLOAD ══ */
+    .img-zone {
+      border: 2px dashed var(--border); border-radius: 10px;
+      padding: 16px; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s; margin-bottom: 14px;
+    }
+    .img-zone:hover, .img-zone.drag-over { border-color: var(--balance); background: #faf5ff; }
+    .img-zone.has-img { border-style: solid; border-color: var(--income); background: var(--income-light); cursor: default; }
+    .img-idle { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .img-idle .icon { font-size: 26px; }
+    .img-idle p { font-size: 13px; color: var(--muted); }
+    .img-preview { display: none; }
+    .img-preview.show { display: flex; gap: 12px; align-items: flex-start; }
+    .img-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+    .img-info { flex: 1; text-align: left; }
+    .img-status { font-size: 13px; margin-bottom: 6px; }
+    .img-status.loading { color: var(--balance); }
+    .img-status.done    { color: var(--income); }
+    .img-status.error   { color: var(--expense); }
+    .img-clear { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+    .img-clear:hover { color: var(--expense); }
+    .spinner {
+      display: inline-block; width: 13px; height: 13px;
+      border: 2px solid #d1c4e9; border-top-color: var(--balance);
+      border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 5px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .btn { padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: opacity .15s; }
     .btn:hover { opacity: .85; }
@@ -243,18 +302,107 @@
     }
     .modal-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
     .modal-box .form-row { margin-bottom: 12px; }
-    .modal-box .form-row input {
-      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;
-    }
+    .modal-box .form-row input { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
     .modal-box .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
     .modal-box .btn-sm { padding: 8px 18px; font-size: 14px; }
 
+    /* ══ RUNNING PAGE ══ */
+    #page-run { display: none; }
+    .run-sum-bar {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px; padding: 16px; max-width: 700px; margin: 0 auto;
+    }
+    .run-card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); text-align: center; }
+    .run-card.today    { border-top: 3px solid var(--run); }
+    .run-card.distance { border-top: 3px solid var(--income); }
+    .run-card.topscore { border-top: 3px solid #f59e0b; }
+    .run-card.today    .sum-value { color: var(--run); }
+    .run-card.distance .sum-value { color: var(--income); }
+    .run-card.topscore .sum-value { color: #f59e0b; }
+    .run-ctrl {
+      max-width: 700px; margin: 0 auto; padding: 0 16px 12px;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    }
+    .run-table-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 16px; overflow-x: auto; }
+    .run-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .run-table th { background: var(--run); color: #fff; padding: 10px 12px; font-size: 13px; font-weight: 600; text-align: left; white-space: nowrap; }
+    .run-table td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .run-table tr:last-child td { border-bottom: none; }
+    .run-table tr:hover td { background: var(--run-light); }
+    .run-rank { font-weight: 700; }
+    .run-eff { font-weight: 700; color: var(--income); }
+    .run-detail-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 16px; }
+    .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 0 0 8px; text-transform: uppercase; letter-spacing: .5px; }
+    .run-item {
+      background: var(--card); border-radius: var(--radius); padding: 12px 16px;
+      box-shadow: var(--shadow); display: grid; grid-template-columns: 1fr auto auto;
+      gap: 10px; align-items: center; margin-bottom: 8px;
+    }
+    .run-name { font-size: 15px; font-weight: 600; }
+    .run-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .run-dist { font-size: 15px; font-weight: 700; color: var(--income); white-space: nowrap; text-align: right; }
+    .run-dist small { font-size: 11px; color: var(--muted); display: block; }
+    .run-actions { display: flex; flex-direction: column; gap: 4px; }
+    .run-edit-btn { padding: 4px 10px; font-size: 12px; border: 1px solid var(--border); border-radius: 5px; cursor: pointer; background: #fff; color: var(--primary); }
+    .run-edit-btn:hover { background: var(--primary-light); }
+    .run-del-btn  { padding: 4px 10px; font-size: 12px; border: none; border-radius: 5px; cursor: pointer; background: var(--expense-light); color: var(--expense); }
+    .run-del-btn:hover { background: #fca5a5; }
+    .run-empty { text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px; }
+    .groups-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 32px; }
+    .groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+    .group-card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
+    .group-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--border); }
+    .group-member { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #f3f4f6; }
+    .group-member:last-child { border-bottom: none; }
+    .run-eff-preview {
+      background: var(--income-light); border: 1px solid var(--income); border-radius: 8px;
+      padding: 10px 14px; font-size: 14px; color: var(--income); font-weight: 600;
+      margin-bottom: 14px; text-align: center;
+    }
+
+    /* ══ PROJECT BAR ══ */
+    .project-bar {
+      max-width: 700px; margin: 0 auto; padding: 12px 16px 0;
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .project-select {
+      flex: 1; min-width: 160px; padding: 8px 12px;
+      border: 1.5px solid var(--run); border-radius: 8px;
+      font-size: 14px; font-weight: 600; color: var(--run);
+      background: #fff; cursor: pointer;
+    }
+    .project-select:focus { outline: none; box-shadow: 0 0 0 3px rgba(14,165,233,.15); }
+    .proj-badge {
+      background: var(--run-light); color: var(--run);
+      border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600;
+    }
+    .proj-meta { font-size: 12px; color: var(--muted); }
+    .manual-group-row { margin-bottom: 12px; }
+    .manual-group-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .manual-label-input {
+      flex: 1; padding: 6px 10px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text);
+    }
+    .manual-label-input:focus { outline: none; border-color: var(--run); }
+    .manual-members-ta {
+      width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 13px; min-height: 64px; font-family: inherit;
+      resize: vertical; color: var(--text);
+    }
+    .manual-members-ta:focus { outline: none; border-color: var(--run); }
+    .manual-del-btn {
+      padding: 4px 10px; background: var(--expense-light); color: var(--expense);
+      border: none; border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap;
+    }
+
     @media (max-width: 480px) {
-      .summary-bar { gap: 8px; padding: 12px; }
+      .summary-bar, .run-sum-bar { gap: 8px; padding: 12px; }
       .sum-value { font-size: 16px; }
       .tx-item { grid-template-columns: auto 1fr auto auto; gap: 8px; }
       .tx-amount { font-size: 15px; }
-      header h1 { font-size: 14px; }
+      header h1 { font-size: 13px; }
+      .tab-btn { padding: 4px 8px; font-size: 12px; }
+      .run-table th, .run-table td { padding: 8px; font-size: 12px; }
     }
   </style>
 </head>
@@ -269,6 +417,12 @@
     <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" />
     <div class="login-error" id="login-error"></div>
     <button class="login-btn" id="login-btn" onclick="doLogin()">登 录</button>
+    <div style="margin-top:24px;padding-top:20px;border-top:1px solid #f0f0f0;">
+      <p style="font-size:12px;color:#9ca3af;margin-bottom:10px;">扫码访问本页面</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https%3A%2F%2Fjiazhenzhan1223-prog.github.io%2FA-%2F&bgcolor=ffffff&color=1a56db&margin=6"
+           alt="二维码" style="width:160px;height:160px;border-radius:8px;" />
+      <p style="font-size:11px;color:#9ca3af;margin-top:8px;">戈21 A+ 募集资金管理</p>
+    </div>
   </div>
 </div>
 
@@ -287,19 +441,51 @@
   </div>
 </div>
 
-<!-- ══ RECORD ENTRY MODAL ══ -->
+<!-- ══ API SETTINGS MODAL ══ -->
+<div id="api-modal" class="modal-overlay center hidden">
+  <div class="modal-box">
+    <h3>⚙ AI 图片识别设置</h3>
+    <div class="form-row">
+      <label>Google Gemini API Key</label>
+      <input type="text" id="api-key-input" placeholder="AIza..." />
+      <p class="modal-hint">
+        免费获取：访问 <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>
+        → Create API key → 复制粘贴到此处。<br>Key 仅保存在本地浏览器，不会上传。
+      </p>
+    </div>
+    <div class="modal-msg" id="api-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel btn-sm" onclick="document.getElementById('api-modal').classList.add('hidden')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="saveApiKey()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FUND RECORD ENTRY MODAL ══ -->
 <div id="entry-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title" id="entry-modal-title">记一笔</div>
-
-    <!-- income / expense toggle -->
     <div class="dir-toggle">
       <button class="dir-btn income active" id="dir-income" onclick="setDir('income')">💰 收入</button>
       <button class="dir-btn expense" id="dir-expense" onclick="setDir('expense')">💸 支出</button>
     </div>
-
-    <!-- fields -->
+    <div class="img-zone" id="img-zone"
+         ondrop="handleDrop(event)" ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)" onclick="triggerImgInput()">
+      <div class="img-idle" id="img-idle">
+        <div class="icon">🖼</div>
+        <p>点击或拖拽上传凭证图片<br><small>支持微信/支付宝截图、收据（AI自动识别）</small></p>
+      </div>
+      <div class="img-preview" id="img-preview">
+        <img class="img-thumb" id="img-thumb" />
+        <div class="img-info">
+          <div class="img-status" id="img-status"></div>
+          <span class="img-clear" onclick="clearImg(event)">✕ 清除图片</span>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleFileInput(event)" />
     <div class="form-row-2">
       <div class="form-row" style="margin-bottom:0">
         <label>日期 *</label>
@@ -336,14 +522,13 @@
   </div>
 </div>
 
-<!-- ══ EDIT MODAL ══ -->
+<!-- ══ FUND EDIT MODAL ══ -->
 <div id="edit-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title">编辑记录</div>
     <input type="hidden" id="edit-id" />
     <input type="hidden" id="edit-dir" />
-
     <div class="form-row-2">
       <div class="form-row" style="margin-bottom:0">
         <label>日期 *</label>
@@ -375,53 +560,279 @@
   </div>
 </div>
 
+<!-- ══ PROJECT MODAL ══ -->
+<div id="proj-modal" class="modal-overlay center hidden">
+  <div class="modal-box">
+    <h3 id="proj-modal-title">📋 新建项目</h3>
+    <input type="hidden" id="proj-edit-id" />
+    <div class="form-row">
+      <label>项目名称 *</label>
+      <input type="text" id="proj-name" placeholder="如：2026年5月第一期" />
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>开始日期 *</label>
+        <input type="date" id="proj-start" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>结束日期 *</label>
+        <input type="date" id="proj-end" />
+      </div>
+    </div>
+    <div class="modal-msg" id="proj-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel btn-sm" onclick="document.getElementById('proj-modal').classList.add('hidden')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="confirmProject()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RUN ENTRY MODAL ══ -->
+<div id="run-entry-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">记一笔（跑量）</div>
+    <div class="img-zone" id="run-img-zone"
+         ondrop="handleRunDrop(event)" ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)" onclick="triggerRunImgInput()">
+      <div class="img-idle" id="run-img-idle">
+        <div class="icon">🏃</div>
+        <p>点击或拖拽上传运动截图<br><small>支持跑步APP截图（AI自动识别）</small></p>
+      </div>
+      <div class="img-preview" id="run-img-preview">
+        <img class="img-thumb" id="run-img-thumb" />
+        <div class="img-info">
+          <div class="img-status" id="run-img-status"></div>
+          <span class="img-clear" onclick="clearRunImg(event)">✕ 清除图片</span>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="run-img-input" accept="image/*" style="display:none" onchange="handleRunFileInput(event)" />
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>姓名 *</label>
+        <input type="text" id="r-name" placeholder="跑者姓名" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>日期 *</label>
+        <input type="date" id="r-date" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>跑量（km）*</label>
+        <input type="number" id="r-dist" placeholder="0.0" min="0" step="0.01" oninput="updateRunPreview()" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>爬升（m）</label>
+        <input type="number" id="r-elev" placeholder="0" min="0" step="1" oninput="updateRunPreview()" />
+      </div>
+    </div>
+    <div id="run-eff-preview" class="run-eff-preview" style="display:none"></div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="r-note" placeholder="活动名称或备注..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeRunEntry()">取消</button>
+      <button class="btn btn-primary" onclick="saveRun()" style="background:var(--run)">确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RUN EDIT MODAL ══ -->
+<div id="run-edit-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">编辑跑量记录</div>
+    <input type="hidden" id="re-id" />
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>姓名 *</label>
+        <input type="text" id="re-name" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>日期 *</label>
+        <input type="date" id="re-date" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>跑量（km）*</label>
+        <input type="number" id="re-dist" min="0" step="0.01" oninput="updateRunEditPreview()" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>爬升（m）</label>
+        <input type="number" id="re-elev" min="0" step="1" oninput="updateRunEditPreview()" />
+      </div>
+    </div>
+    <div id="run-edit-preview" class="run-eff-preview" style="display:none"></div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="re-note"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeRunEdit()">取消</button>
+      <button class="btn btn-primary" onclick="saveRunEdit()" style="background:var(--run)">保存修改</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ APP ══ -->
 <div id="app">
   <header>
-    <h1>⛰ 戈21 A+ 资金管理</h1>
-    <button class="hbtn" onclick="openPwd()">🔑 改密码</button>
+    <button class="back-btn hidden" id="back-btn" onclick="navigateHome()">← 返回</button>
+    <h1 id="app-title">⛰ 戈21 A+</h1>
+    <button class="hbtn" onclick="openApi()">⚙ AI</button>
+    <button class="hbtn" onclick="openPwd()">🔑 密码</button>
     <button class="hbtn" onclick="doLogout()">退出</button>
   </header>
 
-  <!-- Summary -->
-  <div class="summary-bar">
-    <div class="sum-card income">
-      <div class="sum-label">总收入</div>
-      <div class="sum-value" id="s-income">¥0.00</div>
-    </div>
-    <div class="sum-card balance">
-      <div class="sum-label">余　额</div>
-      <div class="sum-value" id="s-balance">¥0.00</div>
-    </div>
-    <div class="sum-card expense">
-      <div class="sum-label">总支出</div>
-      <div class="sum-value" id="s-expense">¥0.00</div>
-    </div>
-  </div>
-
-  <!-- Record button -->
-  <div class="record-btn-wrap">
-    <button class="record-btn" onclick="openEntry()">
-      <span style="font-size:22px">＋</span> 记一笔
-    </button>
-  </div>
-
-  <!-- List -->
-  <div class="list-wrap">
-    <div class="filter-bar">
-      <div class="seg-tabs">
-        <button class="seg-btn active" data-seg="all"     onclick="setSeg('all')">全部</button>
-        <button class="seg-btn"        data-seg="income"  onclick="setSeg('income')">收入</button>
-        <button class="seg-btn"        data-seg="expense" onclick="setSeg('expense')">支出</button>
+  <!-- ══ HOME SCREEN ══ -->
+  <div id="page-home">
+    <div class="home-greeting">⛰ 戈21 A+</div>
+    <div class="home-sub">请选择功能</div>
+    <div class="nav-card fund" onclick="navigateTo('fund')">
+      <div class="nav-icon">💰</div>
+      <div class="nav-body">
+        <div class="nav-title">资金管理</div>
+        <div class="nav-sub">收入 · 支出 · 余额</div>
+        <div class="nav-stat" id="home-fund-stat">加载中...</div>
       </div>
-      <input class="search-input" id="search" type="text" placeholder="搜索经办人/备注..." oninput="renderList()" />
-      <select class="type-filter" id="type-filter" onchange="renderList()">
-        <option value="">全部类型</option>
+      <div class="nav-arrow">›</div>
+    </div>
+    <div class="nav-card run" onclick="navigateTo('run')">
+      <div class="nav-icon">🏃</div>
+      <div class="nav-body">
+        <div class="nav-title">跑量统计</div>
+        <div class="nav-sub">记录 · 排行 · 分组</div>
+        <div class="nav-stat" id="home-run-stat">加载中...</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </div>
+  </div>
+
+  <!-- ══ FUND PAGE ══ -->
+  <div id="page-fund" style="display:none">
+    <div class="summary-bar">
+      <div class="sum-card income">
+        <div class="sum-label">总收入</div>
+        <div class="sum-value" id="s-income">¥0.00</div>
+      </div>
+      <div class="sum-card balance">
+        <div class="sum-label">余　额</div>
+        <div class="sum-value" id="s-balance">¥0.00</div>
+      </div>
+      <div class="sum-card expense">
+        <div class="sum-label">总支出</div>
+        <div class="sum-value" id="s-expense">¥0.00</div>
+      </div>
+    </div>
+    <div class="record-btn-wrap">
+      <button class="record-btn" onclick="openEntry()">
+        <span style="font-size:22px">＋</span> 记一笔
+      </button>
+    </div>
+    <div class="list-wrap">
+      <div class="filter-bar">
+        <div class="seg-tabs">
+          <button class="seg-btn active" data-seg="all"     onclick="setSeg('all')">全部</button>
+          <button class="seg-btn"        data-seg="income"  onclick="setSeg('income')">收入</button>
+          <button class="seg-btn"        data-seg="expense" onclick="setSeg('expense')">支出</button>
+        </div>
+        <input class="search-input" id="search" type="text" placeholder="搜索经办人/备注..." oninput="renderList()" />
+        <select class="type-filter" id="type-filter" onchange="renderList()">
+          <option value="">全部类型</option>
+        </select>
+        <button class="dl-btn" onclick="downloadCSV()">⬇ CSV</button>
+      </div>
+      <div class="tx-list" id="tx-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ RUN PAGE ══ -->
+  <div id="page-run" style="display:none">
+    <!-- Project selector -->
+    <div class="project-bar">
+      <select class="project-select" id="project-select" onchange="setProject(this.value)">
+        <option value="">全部记录</option>
       </select>
-      <button class="dl-btn" onclick="downloadCSV()">⬇ CSV</button>
+      <button class="dl-btn" onclick="openNewProject()" style="background:var(--run)">+ 新建项目</button>
+      <button class="dl-btn" id="edit-proj-btn" onclick="editCurrentProject()" style="display:none;background:#6b7280">编辑</button>
+      <button class="dl-btn" id="del-proj-btn"  onclick="deleteCurrentProject()" style="display:none;background:var(--expense)">删除</button>
+    </div>
+    <div id="proj-info-bar" style="max-width:700px;margin:6px auto 0;padding:0 16px;display:none">
+      <span class="proj-meta" id="proj-info-text"></span>
     </div>
 
-    <div class="tx-list" id="tx-list"></div>
+    <!-- Summary cards -->
+    <div class="run-sum-bar">
+      <div class="run-card today">
+        <div class="sum-label">今日跑量</div>
+        <div class="sum-value" id="rs-today">0 km</div>
+      </div>
+      <div class="run-card distance">
+        <div class="sum-label">总有效跑量</div>
+        <div class="sum-value" id="rs-total">0 km</div>
+      </div>
+      <div class="run-card topscore">
+        <div class="sum-label">跑量最多</div>
+        <div class="sum-value" id="rs-top" style="font-size:14px;line-height:1.3">-</div>
+      </div>
+    </div>
+
+    <!-- 记一笔 button -->
+    <div class="record-btn-wrap">
+      <button class="record-btn" onclick="openRunEntry()" style="background:var(--run);box-shadow:0 4px 14px rgba(14,165,233,.4)">
+        <span style="font-size:22px">＋</span> 记一笔
+      </button>
+    </div>
+
+    <!-- Report area (same structure as fund page) -->
+    <div class="list-wrap">
+      <div class="filter-bar">
+        <div id="run-period-ctrl" class="seg-tabs">
+          <button class="seg-btn active" data-rp="all"   onclick="setRunPeriod('all')">全部</button>
+          <button class="seg-btn"        data-rp="month" onclick="setRunPeriod('month')">本月</button>
+          <button class="seg-btn"        data-rp="week"  onclick="setRunPeriod('week')">本周</button>
+        </div>
+        <button class="dl-btn" onclick="exportRunTable()" style="background:var(--balance)">📋 导出</button>
+        <button class="dl-btn" onclick="toggleGroups()" id="groups-toggle-btn" style="background:#6b7280">👥 分组</button>
+      </div>
+
+      <!-- Leaderboard -->
+      <div id="run-leaderboard"></div>
+
+      <!-- Groups (inside report area) -->
+      <div class="groups-wrap" id="groups-wrap" style="display:none;padding:0;margin-top:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <div class="seg-tabs">
+            <button class="seg-btn active" id="mode-snake-btn" onclick="setGroupMode('snake')">🐍 蛇形自动</button>
+            <button class="seg-btn"        id="mode-manual-btn" onclick="setGroupMode('manual')">✏️ 手动指定</button>
+          </div>
+        </div>
+        <div id="snake-ctrl" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+          <label style="font-size:13px;color:var(--muted)">分组数量</label>
+          <input type="number" id="group-count" value="4" min="2" max="10"
+                 style="width:64px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px" />
+          <button class="dl-btn" onclick="generateGroups()" style="background:var(--run)">生成</button>
+        </div>
+        <div id="manual-ctrl" style="display:none">
+          <div id="manual-groups-editor"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="dl-btn" onclick="addManualGroup()" style="background:#6b7280">+ 添加一组</button>
+            <button class="dl-btn" onclick="saveManualGroups()" style="background:var(--run)">✓ 保存分组</button>
+          </div>
+        </div>
+        <div class="groups-grid" id="groups-grid"></div>
+      </div>
+
+      <!-- Detail records -->
+      <div style="margin-top:16px">
+        <div class="section-title">明细记录</div>
+        <div id="run-detail-list"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -488,6 +899,23 @@ async function changePassword() {
   setTimeout(() => document.getElementById('pwd-modal').classList.add('hidden'), 1100);
 }
 
+// ═══════════════════════════════════════
+// API KEY
+// ═══════════════════════════════════════
+const API_STORE = 'ge21_gemini_key';
+function openApi() {
+  document.getElementById('api-key-input').value = localStorage.getItem(API_STORE) || '';
+  setMsg('api-msg','','');
+  document.getElementById('api-modal').classList.remove('hidden');
+}
+function saveApiKey() {
+  const v = document.getElementById('api-key-input').value.trim();
+  if (!v) return setMsg('api-msg','请输入 API Key','error');
+  localStorage.setItem(API_STORE, v);
+  setMsg('api-msg','已保存！','success');
+  setTimeout(() => document.getElementById('api-modal').classList.add('hidden'), 900);
+}
+
 function setMsg(id, text, cls) {
   const el = document.getElementById(id);
   el.textContent = text;
@@ -495,7 +923,47 @@ function setMsg(id, text, cls) {
 }
 
 // ═══════════════════════════════════════
-// DATA
+// PAGE NAVIGATION
+// ═══════════════════════════════════════
+let currentPage = 'home';
+
+function navigateHome() {
+  currentPage = 'home';
+  document.getElementById('page-home').style.display = '';
+  document.getElementById('page-fund').style.display = 'none';
+  document.getElementById('page-run').style.display  = 'none';
+  document.getElementById('back-btn').classList.add('hidden');
+  document.getElementById('app-title').textContent = '⛰ 戈21 A+';
+  updateHomeStats();
+}
+
+function navigateTo(page) {
+  currentPage = page;
+  document.getElementById('page-home').style.display = 'none';
+  document.getElementById('page-fund').style.display = page === 'fund' ? '' : 'none';
+  document.getElementById('page-run').style.display  = page === 'run'  ? '' : 'none';
+  document.getElementById('back-btn').classList.remove('hidden');
+  document.getElementById('app-title').textContent = page === 'fund' ? '💰 资金管理' : '🏃 跑量统计';
+  if (page === 'fund') { updateTypeFilter(); renderList(); updateSummary(); }
+  if (page === 'run')  { refreshProjectSelect(); updateRunSummary(); renderLeaderboard(); renderRunDetail(); }
+}
+
+function updateHomeStats() {
+  const all = loadAll();
+  const inc = all.filter(r => r.dir === 'income').reduce((s,r) => s+r.amount, 0);
+  const exp = all.filter(r => r.dir === 'expense').reduce((s,r) => s+r.amount, 0);
+  document.getElementById('home-fund-stat').textContent =
+    `余额 ¥${(inc-exp).toFixed(2)} · 共 ${all.length} 笔`;
+  const runs  = loadRuns();
+  const lb    = buildLeaderboard(runs);
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCount = runs.filter(r => r.date === today).length;
+  document.getElementById('home-run-stat').textContent =
+    `${lb.length} 人参与 · 今日 ${todayCount} 条记录`;
+}
+
+// ═══════════════════════════════════════
+// FUND DATA
 // ═══════════════════════════════════════
 const DB_KEY = 'ge21_records';
 function loadAll() { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); }
@@ -507,7 +975,7 @@ const TYPE_OPTS = {
 };
 
 // ═══════════════════════════════════════
-// ENTRY MODAL
+// FUND ENTRY MODAL
 // ═══════════════════════════════════════
 let currentDir = 'income';
 
@@ -520,17 +988,16 @@ function openEntry(dir) {
 }
 function closeEntry() {
   document.getElementById('entry-modal').classList.add('hidden');
+  clearImg({ stopPropagation: () => {} });
 }
 
 function setDir(dir) {
   currentDir = dir;
   document.getElementById('dir-income').classList.toggle('active', dir === 'income');
   document.getElementById('dir-expense').classList.toggle('active', dir === 'expense');
-  // update type options
   const sel = document.getElementById('f-type');
   sel.innerHTML = TYPE_OPTS[dir].map(o => `<option value="${o}">${o}</option>`).join('');
-  document.getElementById('type-label').textContent   = dir === 'income' ? '收入类型' : '支出类型';
-  document.getElementById('person-label').textContent = dir === 'income' ? '经办人 *' : '经办人 *';
+  document.getElementById('type-label').textContent = dir === 'income' ? '收入类型' : '支出类型';
 }
 
 function clearEntryForm() {
@@ -563,7 +1030,7 @@ function saveRecord() {
 }
 
 // ═══════════════════════════════════════
-// EDIT MODAL
+// FUND EDIT MODAL
 // ═══════════════════════════════════════
 function openEdit(id) {
   const rec = loadAll().find(r => r.id === id);
@@ -574,7 +1041,7 @@ function openEdit(id) {
   document.getElementById('e-amount').value    = rec.amount;
   document.getElementById('e-person').value    = rec.person;
   document.getElementById('e-remark').value    = rec.remark;
-  document.getElementById('e-type-label').textContent   = rec.dir === 'income' ? '收入类型' : '支出类型';
+  document.getElementById('e-type-label').textContent = rec.dir === 'income' ? '收入类型' : '支出类型';
   document.getElementById('e-person-label').textContent = '经办人 *';
   const sel = document.getElementById('e-type');
   sel.innerHTML = TYPE_OPTS[rec.dir].map(o => `<option value="${o}"${o===rec.type?' selected':''}>${o}</option>`).join('');
@@ -612,13 +1079,133 @@ function deleteRecord(id) {
 }
 
 // ═══════════════════════════════════════
-// RENDER LIST
+// FUND IMAGE UPLOAD & GEMINI
+// ═══════════════════════════════════════
+function triggerImgInput() {
+  if (document.getElementById('img-zone').classList.contains('has-img')) return;
+  document.getElementById('img-input').click();
+}
+function handleDragOver(e)  { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) processImg(f);
+}
+function handleFileInput(e) {
+  if (e.target.files[0]) processImg(e.target.files[0]);
+  e.target.value = '';
+}
+function clearImg(e) {
+  e.stopPropagation();
+  document.getElementById('img-zone').classList.remove('has-img');
+  document.getElementById('img-idle').style.display = '';
+  document.getElementById('img-preview').classList.remove('show');
+  ['f-date','f-amount','f-person','f-remark'].forEach(id =>
+    document.getElementById(id).classList.remove('ai-filled'));
+}
+
+async function processImg(file) {
+  const zone = document.getElementById('img-zone');
+  const idleEl = document.getElementById('img-idle');
+  const preEl = document.getElementById('img-preview');
+  const thumb = document.getElementById('img-thumb');
+  const statusEl = document.getElementById('img-status');
+
+  thumb.src = URL.createObjectURL(file);
+  idleEl.style.display = 'none';
+  preEl.classList.add('show');
+  zone.classList.add('has-img');
+
+  const apiKey = localStorage.getItem(API_STORE);
+  if (!apiKey) {
+    statusEl.className = 'img-status error';
+    statusEl.innerHTML = '⚠ 未设置 API Key，点右上角 ⚙ AI 配置';
+    return;
+  }
+  statusEl.className = 'img-status loading';
+  statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
+
+  try {
+    const b64 = await toBase64(file);
+    const res = await callGemini(b64, file.type);
+    fillEntry(res);
+    statusEl.className = 'img-status done';
+    statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
+  } catch (err) {
+    statusEl.className = 'img-status error';
+    statusEl.innerHTML = '❌ 识别失败：' + (err.message || '请检查 API Key');
+  }
+}
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function callGemini(b64, mime) {
+  const today = new Date().toISOString().slice(0,10);
+  const isInc = currentDir === 'income';
+  const typeOpt = TYPE_OPTS[currentDir].join('、');
+  const prompt = `请分析这张图片（可能是微信/支付宝转账截图、银行转账、购物小票或收据）。
+提取其中的${isInc ? '收款/到账' : '付款/支出'}信息，只返回如下纯 JSON，不要加代码块标记：
+{"date":"YYYY-MM-DD（图中日期，无则用${today}）","amount":数字金额不含符号,"person":"${isInc?'付款方姓名':'收款方或商家'}，无则空字符串","type":"从[${typeOpt}]选一个","remark":"简短摘要"}
+若无法识别金额，amount 填 null。`;
+
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${localStorage.getItem(API_STORE)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime, data: b64 } }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
+      })
+    }
+  );
+  if (!resp.ok) {
+    const e = await resp.json().catch(() => ({}));
+    throw new Error(e.error?.message || `HTTP ${resp.status}`);
+  }
+  const data = await resp.json();
+  const txt  = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim()
+                 .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
+  return JSON.parse(txt);
+}
+
+function fillEntry(r) {
+  const set = (id, val) => {
+    if (val == null || val === '') return;
+    const el = document.getElementById(id);
+    if (el.tagName === 'SELECT') {
+      const opt = Array.from(el.options).find(o => o.value === val);
+      if (opt) el.value = val;
+    } else {
+      el.value = val;
+      el.classList.add('ai-filled');
+    }
+  };
+  set('f-date',   r.date);
+  set('f-amount', r.amount);
+  set('f-person', r.person);
+  set('f-type',   r.type);
+  set('f-remark', r.remark);
+  if (r.type && TYPE_OPTS.income.includes(r.type))  setDir('income');
+  if (r.type && TYPE_OPTS.expense.includes(r.type)) setDir('expense');
+}
+
+// ═══════════════════════════════════════
+// FUND RENDER LIST
 // ═══════════════════════════════════════
 let currentSeg = 'all';
 
 function setSeg(seg) {
   currentSeg = seg;
-  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.seg === seg));
+  document.querySelectorAll('.seg-btn[data-seg]').forEach(b => b.classList.toggle('active', b.dataset.seg === seg));
   updateTypeFilter();
   renderList();
 }
@@ -680,7 +1267,7 @@ function renderList() {
 }
 
 // ═══════════════════════════════════════
-// SUMMARY
+// FUND SUMMARY
 // ═══════════════════════════════════════
 function updateSummary() {
   const all = loadAll();
@@ -716,18 +1303,633 @@ function cv(v) { const s=String(v??''); return /[,"\n]/.test(s)?`"${s.replace(/"
 function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ═══════════════════════════════════════
+// RUNNING DATA
+// ═══════════════════════════════════════
+const RUN_KEY = 'ge21_runs';
+function loadRuns() { return JSON.parse(localStorage.getItem(RUN_KEY) || '[]'); }
+function saveRuns(d) { localStorage.setItem(RUN_KEY, JSON.stringify(d)); }
+function effRun(dist, elev) { return +(dist + (elev || 0) / 100).toFixed(2); }
+
+// ═══════════════════════════════════════
+// RUN ENTRY MODAL
+// ═══════════════════════════════════════
+function openRunEntry() {
+  document.getElementById('r-date').value = new Date().toISOString().slice(0,10);
+  ['r-name','r-dist','r-elev','r-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('run-eff-preview').style.display = 'none';
+  clearRunImg({ stopPropagation: ()=>{} });
+  document.getElementById('run-entry-modal').classList.remove('hidden');
+}
+function closeRunEntry() { document.getElementById('run-entry-modal').classList.add('hidden'); }
+
+function updateRunPreview() {
+  const dist = parseFloat(document.getElementById('r-dist').value) || 0;
+  const elev = parseFloat(document.getElementById('r-elev').value) || 0;
+  const el = document.getElementById('run-eff-preview');
+  if (dist > 0) {
+    el.textContent = `有效跑量 = ${dist} + ${elev}÷100 = ${effRun(dist, elev)} km`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function saveRun() {
+  const name = document.getElementById('r-name').value.trim();
+  const date = document.getElementById('r-date').value.trim();
+  const dist = parseFloat(document.getElementById('r-dist').value);
+  const elev = parseFloat(document.getElementById('r-elev').value) || 0;
+  const note = document.getElementById('r-note').value.trim();
+  if (!name)                        return alert('请填写姓名');
+  if (!date)                        return alert('请填写日期');
+  if (isNaN(dist) || dist <= 0)     return alert('请填写正确跑量');
+  const runs = loadRuns();
+  runs.push({ id: Date.now(), name, date, distance: dist, elevation: elev, note });
+  runs.sort((a,b) => b.date.localeCompare(a.date));
+  saveRuns(runs);
+  closeRunEntry();
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+// ═══════════════════════════════════════
+// RUN EDIT MODAL
+// ═══════════════════════════════════════
+function openRunEdit(id) {
+  const run = loadRuns().find(r => r.id === id);
+  if (!run) return;
+  document.getElementById('re-id').value   = id;
+  document.getElementById('re-name').value = run.name;
+  document.getElementById('re-date').value = run.date;
+  document.getElementById('re-dist').value = run.distance;
+  document.getElementById('re-elev').value = run.elevation || 0;
+  document.getElementById('re-note').value = run.note || '';
+  updateRunEditPreview();
+  document.getElementById('run-edit-modal').classList.remove('hidden');
+}
+function closeRunEdit() { document.getElementById('run-edit-modal').classList.add('hidden'); }
+
+function updateRunEditPreview() {
+  const dist = parseFloat(document.getElementById('re-dist').value) || 0;
+  const elev = parseFloat(document.getElementById('re-elev').value) || 0;
+  const el = document.getElementById('run-edit-preview');
+  if (dist > 0) {
+    el.textContent = `有效跑量 = ${dist} + ${elev}÷100 = ${effRun(dist, elev)} km`;
+    el.style.display = '';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function saveRunEdit() {
+  const id   = parseInt(document.getElementById('re-id').value);
+  const name = document.getElementById('re-name').value.trim();
+  const date = document.getElementById('re-date').value.trim();
+  const dist = parseFloat(document.getElementById('re-dist').value);
+  const elev = parseFloat(document.getElementById('re-elev').value) || 0;
+  const note = document.getElementById('re-note').value.trim();
+  if (!name)                    return alert('请填写姓名');
+  if (!date)                    return alert('请填写日期');
+  if (isNaN(dist) || dist <= 0) return alert('请填写正确跑量');
+  const runs = loadRuns();
+  const run = runs.find(r => r.id === id);
+  if (run) { run.name = name; run.date = date; run.distance = dist; run.elevation = elev; run.note = note; }
+  runs.sort((a,b) => b.date.localeCompare(a.date));
+  saveRuns(runs);
+  closeRunEdit();
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+function deleteRun(id) {
+  if (!confirm('确定删除该跑量记录？')) return;
+  saveRuns(loadRuns().filter(r => r.id !== id));
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+// ═══════════════════════════════════════
+// PROJECTS
+// ═══════════════════════════════════════
+const PROJ_KEY = 'ge21_projects';
+function loadProjects() { return JSON.parse(localStorage.getItem(PROJ_KEY) || '[]'); }
+function saveProjects(d) { localStorage.setItem(PROJ_KEY, JSON.stringify(d)); }
+
+let activeProjectId = '';
+
+function refreshProjectSelect() {
+  const sel = document.getElementById('project-select');
+  const prev = sel.value;
+  const projs = loadProjects();
+  sel.innerHTML = '<option value="">全部记录</option>' +
+    projs.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  sel.value = projs.find(p => String(p.id) === prev) ? prev : '';
+  activeProjectId = sel.value;
+  refreshProjectUI();
+}
+
+function refreshProjectUI() {
+  const projs = loadProjects();
+  const proj = projs.find(p => String(p.id) === activeProjectId);
+  const hasProj = !!proj;
+  document.getElementById('edit-proj-btn').style.display = hasProj ? '' : 'none';
+  document.getElementById('del-proj-btn').style.display  = hasProj ? '' : 'none';
+  const infoBar = document.getElementById('proj-info-bar');
+  const periodCtrl = document.getElementById('run-period-ctrl');
+  if (proj) {
+    infoBar.style.display = '';
+    document.getElementById('proj-info-text').textContent =
+      `📅 ${proj.startDate} 至 ${proj.endDate}`;
+    if (periodCtrl) periodCtrl.style.display = 'none';
+  } else {
+    infoBar.style.display = 'none';
+    if (periodCtrl) periodCtrl.style.display = '';
+  }
+}
+
+function setProject(id) {
+  activeProjectId = id;
+  // Load group settings from project
+  const proj = id ? loadProjects().find(p => String(p.id) === id) : null;
+  groupMode = (proj && proj.groupMode) || 'snake';
+  manualGroupsData = (proj && proj.manualGroups) ? JSON.parse(JSON.stringify(proj.manualGroups)) : [];
+  // Sync group mode UI if panel is visible
+  if (showGroups) {
+    document.getElementById('mode-snake-btn').classList.toggle('active', groupMode === 'snake');
+    document.getElementById('mode-manual-btn').classList.toggle('active', groupMode === 'manual');
+    applyGroupMode(groupMode);
+  }
+  refreshProjectUI();
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+function openNewProject() {
+  document.getElementById('proj-edit-id').value = '';
+  document.getElementById('proj-name').value    = '';
+  document.getElementById('proj-start').value   = '';
+  document.getElementById('proj-end').value     = '';
+  setMsg('proj-msg','','');
+  document.getElementById('proj-modal-title').textContent = '📋 新建项目';
+  document.getElementById('proj-modal').classList.remove('hidden');
+}
+
+function editCurrentProject() {
+  const proj = loadProjects().find(p => String(p.id) === activeProjectId);
+  if (!proj) return;
+  document.getElementById('proj-edit-id').value = proj.id;
+  document.getElementById('proj-name').value    = proj.name;
+  document.getElementById('proj-start').value   = proj.startDate;
+  document.getElementById('proj-end').value     = proj.endDate;
+  setMsg('proj-msg','','');
+  document.getElementById('proj-modal-title').textContent = '📋 编辑项目';
+  document.getElementById('proj-modal').classList.remove('hidden');
+}
+
+function confirmProject() {
+  const name  = document.getElementById('proj-name').value.trim();
+  const start = document.getElementById('proj-start').value;
+  const end   = document.getElementById('proj-end').value;
+  if (!name)         return setMsg('proj-msg','请填写项目名称','error');
+  if (!start||!end)  return setMsg('proj-msg','请填写开始和结束日期','error');
+  if (start > end)   return setMsg('proj-msg','开始日期不能晚于结束日期','error');
+  const projs = loadProjects();
+  const editId = document.getElementById('proj-edit-id').value;
+  if (editId) {
+    const p = projs.find(p => String(p.id) === editId);
+    if (p) { p.name = name; p.startDate = start; p.endDate = end; }
+  } else {
+    projs.push({ id: Date.now(), name, startDate: start, endDate: end });
+  }
+  saveProjects(projs);
+  document.getElementById('proj-modal').classList.add('hidden');
+  refreshProjectSelect();
+  if (!editId) {
+    const newId = String(projs[projs.length-1].id);
+    document.getElementById('project-select').value = newId;
+    setProject(newId);
+  } else {
+    setProject(activeProjectId);
+    updateRunSummary(); renderLeaderboard(); renderRunDetail();
+  }
+}
+
+function deleteCurrentProject() {
+  const proj = loadProjects().find(p => String(p.id) === activeProjectId);
+  if (!proj) return;
+  if (!confirm(`确定删除项目"${proj.name}"？（跑量数据不会删除）`)) return;
+  saveProjects(loadProjects().filter(p => String(p.id) !== activeProjectId));
+  activeProjectId = '';
+  refreshProjectSelect();
+  document.getElementById('project-select').value = '';
+  setProject('');
+}
+
+// ═══════════════════════════════════════
+// RUN PERIOD FILTER (used when no project active)
+// ═══════════════════════════════════════
+let runPeriod = 'all';
+function setRunPeriod(p) {
+  runPeriod = p;
+  document.querySelectorAll('.seg-btn[data-rp]').forEach(b => b.classList.toggle('active', b.dataset.rp === p));
+  updateRunSummary();
+  renderLeaderboard();
+  renderRunDetail();
+}
+
+function filterByPeriod(runs) {
+  // Project takes priority over period filter
+  if (activeProjectId) {
+    const proj = loadProjects().find(p => String(p.id) === activeProjectId);
+    if (proj) return runs.filter(r => r.date >= proj.startDate && r.date <= proj.endDate);
+  }
+  if (runPeriod === 'all') return runs;
+  const now = new Date();
+  if (runPeriod === 'month') {
+    const ym = now.toISOString().slice(0,7);
+    return runs.filter(r => r.date.slice(0,7) === ym);
+  }
+  if (runPeriod === 'week') {
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const monStr = mon.toISOString().slice(0,10);
+    const sunStr = sun.toISOString().slice(0,10);
+    return runs.filter(r => r.date >= monStr && r.date <= sunStr);
+  }
+  return runs;
+}
+
+function buildLeaderboard(runs) {
+  const map = {};
+  runs.forEach(r => {
+    if (!map[r.name]) map[r.name] = { name: r.name, count: 0, totalDist: 0, totalElev: 0, totalEff: 0 };
+    const m = map[r.name];
+    m.count++;
+    m.totalDist += r.distance;
+    m.totalElev += (r.elevation || 0);
+    m.totalEff  += effRun(r.distance, r.elevation || 0);
+  });
+  return Object.values(map).sort((a,b) => b.totalEff - a.totalEff);
+}
+
+// ═══════════════════════════════════════
+// RUN SUMMARY CARDS
+// ═══════════════════════════════════════
+function updateRunSummary() {
+  const allRuns = loadRuns();
+  const today   = new Date().toISOString().slice(0, 10);
+  const todayEff = allRuns
+    .filter(r => r.date === today)
+    .reduce((s, r) => s + effRun(r.distance, r.elevation || 0), 0);
+  document.getElementById('rs-today').textContent = todayEff > 0 ? todayEff.toFixed(2) + ' km' : '0 km';
+
+  const runs = filterByPeriod(allRuns);
+  const lb   = buildLeaderboard(runs);
+  const total = runs.reduce((s, r) => s + effRun(r.distance, r.elevation || 0), 0);
+  document.getElementById('rs-total').textContent = total.toFixed(1) + ' km';
+  if (lb.length) {
+    document.getElementById('rs-top').innerHTML =
+      `<span style="font-size:16px;font-weight:700">${esc(lb[0].name)}</span><br>` +
+      `<span style="font-size:13px">${lb[0].totalEff.toFixed(2)} km</span>`;
+  } else {
+    document.getElementById('rs-top').textContent = '-';
+  }
+}
+
+// ═══════════════════════════════════════
+// LEADERBOARD TABLE
+// ═══════════════════════════════════════
+function renderLeaderboard() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  const el = document.getElementById('run-leaderboard');
+  if (!lb.length) {
+    el.innerHTML = '<div class="run-empty">暂无跑量记录，点击"记一笔"开始记录</div>';
+    return;
+  }
+  const medal = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span class="run-rank">${i+1}</span>`;
+  el.innerHTML = `<table class="run-table">
+    <thead><tr>
+      <th>排名</th><th>姓名</th><th>次数</th><th>跑量(km)</th><th>爬升(m)</th><th>有效跑量</th>
+    </tr></thead>
+    <tbody>${lb.map((r,i) => `<tr>
+      <td>${medal(i)}</td>
+      <td>${esc(r.name)}</td>
+      <td>${r.count}</td>
+      <td>${r.totalDist.toFixed(1)}</td>
+      <td>${r.totalElev}</td>
+      <td class="run-eff">${r.totalEff.toFixed(2)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+// ═══════════════════════════════════════
+// DETAIL LIST
+// ═══════════════════════════════════════
+function renderRunDetail() {
+  const runs = filterByPeriod(loadRuns());
+  const el = document.getElementById('run-detail-list');
+  if (!runs.length) { el.innerHTML = '<div class="run-empty">暂无明细记录</div>'; return; }
+  el.innerHTML = runs.map(r => `
+    <div class="run-item">
+      <div>
+        <div class="run-name">${esc(r.name)}</div>
+        <div class="run-meta">${r.date}${r.note?' · '+esc(r.note):''} · 爬升${r.elevation||0}m</div>
+      </div>
+      <div class="run-dist">
+        ${r.distance.toFixed(1)} km
+        <small>有效 ${effRun(r.distance, r.elevation||0).toFixed(2)}</small>
+      </div>
+      <div class="run-actions">
+        <button class="run-edit-btn" onclick="openRunEdit(${r.id})">编辑</button>
+        <button class="run-del-btn"  onclick="deleteRun(${r.id})">删除</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// GROUPS
+// ═══════════════════════════════════════
+let showGroups  = false;
+let groupMode   = 'snake';           // 'snake' | 'manual'
+let manualGroupsData = [];           // [{label, members:[]}]
+
+function toggleGroups() {
+  showGroups = !showGroups;
+  document.getElementById('groups-wrap').style.display = showGroups ? '' : 'none';
+  document.getElementById('groups-toggle-btn').textContent = showGroups ? '👥 隐藏分组' : '👥 分组';
+  if (showGroups) applyGroupMode(groupMode);
+}
+
+function setGroupMode(mode) {
+  groupMode = mode;
+  document.getElementById('mode-snake-btn').classList.toggle('active', mode === 'snake');
+  document.getElementById('mode-manual-btn').classList.toggle('active', mode === 'manual');
+  // persist to project
+  if (activeProjectId) {
+    const projs = loadProjects();
+    const p = projs.find(p => String(p.id) === activeProjectId);
+    if (p) { p.groupMode = mode; saveProjects(projs); }
+  }
+  applyGroupMode(mode);
+}
+
+function applyGroupMode(mode) {
+  document.getElementById('snake-ctrl').style.display  = mode === 'snake'  ? '' : 'none';
+  document.getElementById('manual-ctrl').style.display = mode === 'manual' ? '' : 'none';
+  if (mode === 'snake') {
+    generateGroups();
+  } else {
+    if (!manualGroupsData.length) initManualGroups();
+    renderManualEditor();
+    renderManualGroupsDisplay();
+  }
+}
+
+function generateGroups() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  const n = Math.max(2, Math.min(10, parseInt(document.getElementById('group-count').value) || 4));
+  const names = ['一','二','三','四','五','六','七','八','九','十'];
+  const groups = Array.from({length: n}, (_,i) => ({ label: `第${names[i]||i+1}组`, members: [] }));
+  lb.forEach((person, idx) => {
+    const round = Math.floor(idx / n);
+    const pos   = idx % n;
+    const gIdx  = round % 2 === 0 ? pos : n - 1 - pos;
+    groups[gIdx].members.push(person);
+  });
+  document.getElementById('groups-grid').innerHTML = groups.filter(g => g.members.length).map(g => `
+    <div class="group-card">
+      <div class="group-title">🏃 ${g.label}</div>
+      ${g.members.map(m => `
+        <div class="group-member">
+          <span>${esc(m.name)}</span>
+          <span style="color:var(--income);font-weight:600">${m.totalEff.toFixed(2)} km</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ── Manual groups ──
+function initManualGroups() {
+  const n = Math.max(2, Math.min(10, parseInt(document.getElementById('group-count').value) || 4));
+  const names = ['一','二','三','四','五','六','七','八','九','十'];
+  manualGroupsData = Array.from({length: n}, (_,i) => ({ label: `第${names[i]||i+1}组`, members: [] }));
+}
+
+function renderManualEditor() {
+  document.getElementById('manual-groups-editor').innerHTML = manualGroupsData.map((g, i) => `
+    <div class="manual-group-row">
+      <div class="manual-group-header">
+        <input class="manual-label-input" value="${esc(g.label)}"
+               onchange="manualGroupsData[${i}].label=this.value" />
+        <button class="manual-del-btn" onclick="removeManualGroup(${i})">删除</button>
+      </div>
+      <textarea class="manual-members-ta"
+                placeholder="每行一个姓名（如：张三）..."
+                onchange="manualGroupsData[${i}].members=this.value.split('\\n').map(s=>s.trim()).filter(Boolean)">${g.members.join('\n')}</textarea>
+    </div>
+  `).join('');
+}
+
+function addManualGroup() {
+  const names = ['一','二','三','四','五','六','七','八','九','十'];
+  manualGroupsData.push({ label: `第${names[manualGroupsData.length] || manualGroupsData.length+1}组`, members: [] });
+  renderManualEditor();
+}
+
+function removeManualGroup(idx) {
+  manualGroupsData.splice(idx, 1);
+  renderManualEditor();
+  renderManualGroupsDisplay();
+}
+
+function saveManualGroups() {
+  // sync textarea values before saving
+  document.querySelectorAll('.manual-members-ta').forEach((ta, i) => {
+    if (manualGroupsData[i])
+      manualGroupsData[i].members = ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+  });
+  document.querySelectorAll('.manual-label-input').forEach((inp, i) => {
+    if (manualGroupsData[i]) manualGroupsData[i].label = inp.value.trim() || manualGroupsData[i].label;
+  });
+  if (activeProjectId) {
+    const projs = loadProjects();
+    const p = projs.find(p => String(p.id) === activeProjectId);
+    if (p) { p.manualGroups = JSON.parse(JSON.stringify(manualGroupsData)); saveProjects(projs); }
+  }
+  renderManualGroupsDisplay();
+}
+
+function renderManualGroupsDisplay() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  const statsMap = {};
+  lb.forEach(p => { statsMap[p.name] = p; });
+  document.getElementById('groups-grid').innerHTML = manualGroupsData.map(g => `
+    <div class="group-card">
+      <div class="group-title">🏃 ${esc(g.label)}</div>
+      ${g.members.length
+        ? g.members.map(name => {
+            const s = statsMap[name];
+            return `<div class="group-member">
+              <span>${esc(name)}</span>
+              <span style="color:var(--income);font-weight:600">${s ? s.totalEff.toFixed(2)+' km' : '—'}</span>
+            </div>`;
+          }).join('')
+        : '<div style="font-size:12px;color:var(--muted);padding:4px 0">（暂无成员）</div>'}
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+// EXPORT RUN TABLE
+// ═══════════════════════════════════════
+function exportRunTable() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  if (!lb.length) return alert('暂无数据');
+  const proj = activeProjectId ? loadProjects().find(p => String(p.id) === activeProjectId) : null;
+  const label = proj ? proj.name : (runPeriod === 'all' ? '全部' : runPeriod === 'month' ? '本月' : '本周');
+  const lines = [
+    `戈21 A+ 跑量排行 [${label}]`,
+    `生成时间：${new Date().toLocaleString('zh-CN')}`,
+    '',
+    '排名\t姓名\t次数\t跑量(km)\t爬升(m)\t有效跑量',
+    ...lb.map((r,i) => `${i+1}\t${r.name}\t${r.count}\t${r.totalDist.toFixed(1)}\t${r.totalElev}\t${r.totalEff.toFixed(2)}`)
+  ];
+  const text = lines.join('\n');
+  navigator.clipboard.writeText(text).then(
+    () => alert('排行榜已复制到剪贴板！可直接粘贴到微信或文档。'),
+    () => {
+      const a = Object.assign(document.createElement('a'), {
+        href: URL.createObjectURL(new Blob([text], {type:'text/plain;charset=utf-8'})),
+        download: `戈21A+_跑量排行_${new Date().toISOString().slice(0,10)}.txt`
+      });
+      a.click();
+    }
+  );
+}
+
+// ═══════════════════════════════════════
+// RUN IMAGE UPLOAD & GEMINI
+// ═══════════════════════════════════════
+function triggerRunImgInput() {
+  if (document.getElementById('run-img-zone').classList.contains('has-img')) return;
+  document.getElementById('run-img-input').click();
+}
+function handleRunDrop(e) {
+  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) processRunImg(f);
+}
+function handleRunFileInput(e) {
+  if (e.target.files[0]) processRunImg(e.target.files[0]);
+  e.target.value = '';
+}
+function clearRunImg(e) {
+  e.stopPropagation();
+  document.getElementById('run-img-zone').classList.remove('has-img');
+  document.getElementById('run-img-idle').style.display = '';
+  document.getElementById('run-img-preview').classList.remove('show');
+  ['r-name','r-date','r-dist','r-elev','r-note'].forEach(id =>
+    document.getElementById(id).classList.remove('ai-filled'));
+}
+
+async function processRunImg(file) {
+  const zone = document.getElementById('run-img-zone');
+  const idleEl = document.getElementById('run-img-idle');
+  const preEl = document.getElementById('run-img-preview');
+  const thumb = document.getElementById('run-img-thumb');
+  const statusEl = document.getElementById('run-img-status');
+
+  thumb.src = URL.createObjectURL(file);
+  idleEl.style.display = 'none';
+  preEl.classList.add('show');
+  zone.classList.add('has-img');
+
+  const apiKey = localStorage.getItem(API_STORE);
+  if (!apiKey) {
+    statusEl.className = 'img-status error';
+    statusEl.innerHTML = '⚠ 未设置 API Key，点右上角 ⚙ AI 配置';
+    return;
+  }
+  statusEl.className = 'img-status loading';
+  statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
+
+  try {
+    const b64 = await toBase64(file);
+    const res = await callGeminiRun(b64, file.type);
+    fillRunEntry(res);
+    statusEl.className = 'img-status done';
+    statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
+  } catch(err) {
+    statusEl.className = 'img-status error';
+    statusEl.innerHTML = '❌ 识别失败：' + (err.message || '请检查 API Key');
+  }
+}
+
+async function callGeminiRun(b64, mime) {
+  const today = new Date().toISOString().slice(0,10);
+  const prompt = `请分析这张运动截图（可能是跑步APP截图、运动手表截图、健康APP记录等）。
+提取其中的跑步/运动数据，只返回如下纯 JSON，不要加代码块标记：
+{"name":"跑者姓名（无则空字符串）","date":"YYYY-MM-DD（图中日期，无则用${today}）","distance":数字公里数(必须是数字),"elevation":整数爬升米数(无则0),"note":"活动名称或简短摘要"}
+若无法识别距离，distance 填 null。`;
+
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${localStorage.getItem(API_STORE)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime, data: b64 } }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 256 }
+      })
+    }
+  );
+  if (!resp.ok) {
+    const e = await resp.json().catch(()=>({}));
+    throw new Error(e.error?.message || `HTTP ${resp.status}`);
+  }
+  const data = await resp.json();
+  const txt = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim()
+                .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
+  return JSON.parse(txt);
+}
+
+function fillRunEntry(r) {
+  const set = (id, val) => {
+    if (val == null || val === '') return;
+    const el = document.getElementById(id);
+    el.value = val;
+    el.classList.add('ai-filled');
+  };
+  set('r-name', r.name);
+  set('r-date', r.date);
+  if (r.distance != null) set('r-dist', r.distance);
+  if (r.elevation != null) set('r-elev', r.elevation);
+  set('r-note', r.note);
+  updateRunPreview();
+}
+
+// ═══════════════════════════════════════
 // APP INIT
 // ═══════════════════════════════════════
 function appInit() {
-  updateTypeFilter();
-  renderList();
-  updateSummary();
+  navigateHome();
 }
 
 // close modals on overlay click
-['entry-modal','edit-modal'].forEach(id => {
+['entry-modal','edit-modal','run-entry-modal','run-edit-modal','proj-modal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
-    if (e.target === this) { this.classList.add('hidden'); }
+    if (e.target === this) this.classList.add('hidden');
   });
 });
 
