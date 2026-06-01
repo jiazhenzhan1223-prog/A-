@@ -353,6 +353,23 @@
       border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600;
     }
     .proj-meta { font-size: 12px; color: var(--muted); }
+    .manual-group-row { margin-bottom: 12px; }
+    .manual-group-header { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .manual-label-input {
+      flex: 1; padding: 6px 10px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text);
+    }
+    .manual-label-input:focus { outline: none; border-color: var(--run); }
+    .manual-members-ta {
+      width: 100%; padding: 8px 10px; border: 1.5px solid var(--border);
+      border-radius: 6px; font-size: 13px; min-height: 64px; font-family: inherit;
+      resize: vertical; color: var(--text);
+    }
+    .manual-members-ta:focus { outline: none; border-color: var(--run); }
+    .manual-del-btn {
+      padding: 4px 10px; background: var(--expense-light); color: var(--expense);
+      border: none; border-radius: 6px; cursor: pointer; font-size: 12px; white-space: nowrap;
+    }
 
     @media (max-width: 480px) {
       .summary-bar, .run-sum-bar { gap: 8px; padding: 12px; }
@@ -731,7 +748,7 @@
         <button class="seg-btn"        data-rp="week"  onclick="setRunPeriod('week')">本周</button>
       </div>
       <button class="dl-btn" onclick="exportRunTable()" style="background:var(--balance)">📋 导出排行</button>
-      <button class="dl-btn" onclick="toggleGroups()" id="groups-toggle-btn" style="background:#6b7280">👥 蛇形分组</button>
+      <button class="dl-btn" onclick="toggleGroups()" id="groups-toggle-btn" style="background:#6b7280">👥 分组</button>
     </div>
 
     <div class="run-table-wrap">
@@ -739,16 +756,31 @@
     </div>
 
     <div class="groups-wrap" id="groups-wrap" style="display:none">
-      <div class="section-title">蛇形分组</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;max-width:300px">
-        <div class="form-row" style="margin-bottom:0">
-          <label>分组数量</label>
-          <input type="number" id="group-count" value="4" min="2" max="10" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;width:100%" />
-        </div>
-        <div class="form-row" style="margin-bottom:0;display:flex;align-items:flex-end">
-          <button class="btn btn-primary" onclick="generateGroups()" style="background:var(--run);padding:9px 14px;font-size:13px">重新生成</button>
+      <!-- mode toggle -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <div class="seg-tabs">
+          <button class="seg-btn active" id="mode-snake-btn" onclick="setGroupMode('snake')">🐍 蛇形自动</button>
+          <button class="seg-btn"        id="mode-manual-btn" onclick="setGroupMode('manual')">✏️ 手动指定</button>
         </div>
       </div>
+
+      <!-- snake controls -->
+      <div id="snake-ctrl" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <label style="font-size:13px;color:var(--muted)">分组数量</label>
+        <input type="number" id="group-count" value="4" min="2" max="10"
+               style="width:64px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px" />
+        <button class="dl-btn" onclick="generateGroups()" style="background:var(--run)">生成</button>
+      </div>
+
+      <!-- manual controls -->
+      <div id="manual-ctrl" style="display:none">
+        <div id="manual-groups-editor"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="dl-btn" onclick="addManualGroup()" style="background:#6b7280">+ 添加一组</button>
+          <button class="dl-btn" onclick="saveManualGroups()" style="background:var(--run)">✓ 保存分组</button>
+        </div>
+      </div>
+
       <div class="groups-grid" id="groups-grid"></div>
     </div>
 
@@ -1348,6 +1380,16 @@ function refreshProjectUI() {
 
 function setProject(id) {
   activeProjectId = id;
+  // Load group settings from project
+  const proj = id ? loadProjects().find(p => String(p.id) === id) : null;
+  groupMode = (proj && proj.groupMode) || 'snake';
+  manualGroupsData = (proj && proj.manualGroups) ? JSON.parse(JSON.stringify(proj.manualGroups)) : [];
+  // Sync group mode UI if panel is visible
+  if (showGroups) {
+    document.getElementById('mode-snake-btn').classList.toggle('active', groupMode === 'snake');
+    document.getElementById('mode-manual-btn').classList.toggle('active', groupMode === 'manual');
+    applyGroupMode(groupMode);
+  }
   refreshProjectUI();
   updateRunSummary();
   renderLeaderboard();
@@ -1530,15 +1572,42 @@ function renderRunDetail() {
 }
 
 // ═══════════════════════════════════════
-// SNAKE-DRAFT GROUPS
+// GROUPS
 // ═══════════════════════════════════════
-let showGroups = false;
+let showGroups  = false;
+let groupMode   = 'snake';           // 'snake' | 'manual'
+let manualGroupsData = [];           // [{label, members:[]}]
+
 function toggleGroups() {
   showGroups = !showGroups;
-  const wrap = document.getElementById('groups-wrap');
-  wrap.style.display = showGroups ? '' : 'none';
-  document.getElementById('groups-toggle-btn').textContent = showGroups ? '👥 隐藏分组' : '👥 蛇形分组';
-  if (showGroups) generateGroups();
+  document.getElementById('groups-wrap').style.display = showGroups ? '' : 'none';
+  document.getElementById('groups-toggle-btn').textContent = showGroups ? '👥 隐藏分组' : '👥 分组';
+  if (showGroups) applyGroupMode(groupMode);
+}
+
+function setGroupMode(mode) {
+  groupMode = mode;
+  document.getElementById('mode-snake-btn').classList.toggle('active', mode === 'snake');
+  document.getElementById('mode-manual-btn').classList.toggle('active', mode === 'manual');
+  // persist to project
+  if (activeProjectId) {
+    const projs = loadProjects();
+    const p = projs.find(p => String(p.id) === activeProjectId);
+    if (p) { p.groupMode = mode; saveProjects(projs); }
+  }
+  applyGroupMode(mode);
+}
+
+function applyGroupMode(mode) {
+  document.getElementById('snake-ctrl').style.display  = mode === 'snake'  ? '' : 'none';
+  document.getElementById('manual-ctrl').style.display = mode === 'manual' ? '' : 'none';
+  if (mode === 'snake') {
+    generateGroups();
+  } else {
+    if (!manualGroupsData.length) initManualGroups();
+    renderManualEditor();
+    renderManualGroupsDisplay();
+  }
 }
 
 function generateGroups() {
@@ -1562,6 +1631,78 @@ function generateGroups() {
           <span style="color:var(--income);font-weight:600">${m.totalEff.toFixed(2)} km</span>
         </div>
       `).join('')}
+    </div>
+  `).join('');
+}
+
+// ── Manual groups ──
+function initManualGroups() {
+  const n = Math.max(2, Math.min(10, parseInt(document.getElementById('group-count').value) || 4));
+  const names = ['一','二','三','四','五','六','七','八','九','十'];
+  manualGroupsData = Array.from({length: n}, (_,i) => ({ label: `第${names[i]||i+1}组`, members: [] }));
+}
+
+function renderManualEditor() {
+  document.getElementById('manual-groups-editor').innerHTML = manualGroupsData.map((g, i) => `
+    <div class="manual-group-row">
+      <div class="manual-group-header">
+        <input class="manual-label-input" value="${esc(g.label)}"
+               onchange="manualGroupsData[${i}].label=this.value" />
+        <button class="manual-del-btn" onclick="removeManualGroup(${i})">删除</button>
+      </div>
+      <textarea class="manual-members-ta"
+                placeholder="每行一个姓名（如：张三）..."
+                onchange="manualGroupsData[${i}].members=this.value.split('\\n').map(s=>s.trim()).filter(Boolean)">${g.members.join('\n')}</textarea>
+    </div>
+  `).join('');
+}
+
+function addManualGroup() {
+  const names = ['一','二','三','四','五','六','七','八','九','十'];
+  manualGroupsData.push({ label: `第${names[manualGroupsData.length] || manualGroupsData.length+1}组`, members: [] });
+  renderManualEditor();
+}
+
+function removeManualGroup(idx) {
+  manualGroupsData.splice(idx, 1);
+  renderManualEditor();
+  renderManualGroupsDisplay();
+}
+
+function saveManualGroups() {
+  // sync textarea values before saving
+  document.querySelectorAll('.manual-members-ta').forEach((ta, i) => {
+    if (manualGroupsData[i])
+      manualGroupsData[i].members = ta.value.split('\n').map(s => s.trim()).filter(Boolean);
+  });
+  document.querySelectorAll('.manual-label-input').forEach((inp, i) => {
+    if (manualGroupsData[i]) manualGroupsData[i].label = inp.value.trim() || manualGroupsData[i].label;
+  });
+  if (activeProjectId) {
+    const projs = loadProjects();
+    const p = projs.find(p => String(p.id) === activeProjectId);
+    if (p) { p.manualGroups = JSON.parse(JSON.stringify(manualGroupsData)); saveProjects(projs); }
+  }
+  renderManualGroupsDisplay();
+}
+
+function renderManualGroupsDisplay() {
+  const runs = filterByPeriod(loadRuns());
+  const lb = buildLeaderboard(runs);
+  const statsMap = {};
+  lb.forEach(p => { statsMap[p.name] = p; });
+  document.getElementById('groups-grid').innerHTML = manualGroupsData.map(g => `
+    <div class="group-card">
+      <div class="group-title">🏃 ${esc(g.label)}</div>
+      ${g.members.length
+        ? g.members.map(name => {
+            const s = statsMap[name];
+            return `<div class="group-member">
+              <span>${esc(name)}</span>
+              <span style="color:var(--income);font-weight:600">${s ? s.totalEff.toFixed(2)+' km' : '—'}</span>
+            </div>`;
+          }).join('')
+        : '<div style="font-size:12px;color:var(--muted);padding:4px 0">（暂无成员）</div>'}
     </div>
   `).join('');
 }
