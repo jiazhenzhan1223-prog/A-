@@ -588,7 +588,7 @@
 <div id="run-entry-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
     <div class="modal-drag"></div>
-    <div class="modal-title">记跑量</div>
+    <div class="modal-title">记一笔（跑量）</div>
     <div class="img-zone" id="run-img-zone"
          ondrop="handleRunDrop(event)" ondragover="handleDragOver(event)"
          ondragleave="handleDragLeave(event)" onclick="triggerRunImgInput()">
@@ -779,7 +779,7 @@
 
     <div class="record-btn-wrap">
       <button class="record-btn" onclick="openRunEntry()" style="background:var(--run);box-shadow:0 4px 14px rgba(14,165,233,.4)">
-        <span style="font-size:22px">＋</span> 记跑量
+        <span style="font-size:22px">＋</span> 记一笔
       </button>
     </div>
 
@@ -1594,7 +1594,7 @@ function renderLeaderboard() {
   const lb = buildLeaderboard(runs);
   const el = document.getElementById('run-leaderboard');
   if (!lb.length) {
-    el.innerHTML = '<div class="run-empty">暂无跑量记录，点击"记跑量"开始记录</div>';
+    el.innerHTML = '<div class="run-empty">暂无跑量记录，点击"记一笔"开始记录</div>';
     return;
   }
   const medal = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':`<span class="run-rank">${i+1}</span>`;
