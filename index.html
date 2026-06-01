@@ -310,12 +310,12 @@
       gap: 12px; padding: 16px; max-width: 700px; margin: 0 auto;
     }
     .run-card { background: var(--card); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); text-align: center; }
-    .run-card.runners  { border-top: 3px solid var(--run); }
+    .run-card.today    { border-top: 3px solid var(--run); }
     .run-card.distance { border-top: 3px solid var(--income); }
     .run-card.topscore { border-top: 3px solid #f59e0b; }
-    .run-card.runners  .sum-value { color: var(--run); }
+    .run-card.today    .sum-value { color: var(--run); }
     .run-card.distance .sum-value { color: var(--income); }
-    .run-card.topscore .sum-value { color: #f59e0b; font-size: 15px; }
+    .run-card.topscore .sum-value { color: #f59e0b; }
     .run-ctrl {
       max-width: 700px; margin: 0 auto; padding: 0 16px 12px;
       display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
@@ -758,77 +758,77 @@
       <button class="dl-btn" id="edit-proj-btn" onclick="editCurrentProject()" style="display:none;background:#6b7280">编辑</button>
       <button class="dl-btn" id="del-proj-btn"  onclick="deleteCurrentProject()" style="display:none;background:var(--expense)">删除</button>
     </div>
-    <div id="proj-info-bar" style="max-width:700px;margin:8px auto 0;padding:0 16px;display:none">
+    <div id="proj-info-bar" style="max-width:700px;margin:6px auto 0;padding:0 16px;display:none">
       <span class="proj-meta" id="proj-info-text"></span>
     </div>
 
+    <!-- Summary cards -->
     <div class="run-sum-bar">
-      <div class="run-card runners">
-        <div class="sum-label">参与人数</div>
-        <div class="sum-value" id="rs-runners">0</div>
+      <div class="run-card today">
+        <div class="sum-label">今日跑量</div>
+        <div class="sum-value" id="rs-today">0 km</div>
       </div>
       <div class="run-card distance">
         <div class="sum-label">总有效跑量</div>
         <div class="sum-value" id="rs-total">0 km</div>
       </div>
       <div class="run-card topscore">
-        <div class="sum-label">排名第一</div>
-        <div class="sum-value" id="rs-top">-</div>
+        <div class="sum-label">跑量最多</div>
+        <div class="sum-value" id="rs-top" style="font-size:14px;line-height:1.3">-</div>
       </div>
     </div>
 
+    <!-- 记一笔 button -->
     <div class="record-btn-wrap">
       <button class="record-btn" onclick="openRunEntry()" style="background:var(--run);box-shadow:0 4px 14px rgba(14,165,233,.4)">
         <span style="font-size:22px">＋</span> 记一笔
       </button>
     </div>
 
-    <div class="run-ctrl">
-      <div id="run-period-ctrl" class="seg-tabs">
-        <button class="seg-btn active" data-rp="all"   onclick="setRunPeriod('all')">全部</button>
-        <button class="seg-btn"        data-rp="month" onclick="setRunPeriod('month')">本月</button>
-        <button class="seg-btn"        data-rp="week"  onclick="setRunPeriod('week')">本周</button>
+    <!-- Report area (same structure as fund page) -->
+    <div class="list-wrap">
+      <div class="filter-bar">
+        <div id="run-period-ctrl" class="seg-tabs">
+          <button class="seg-btn active" data-rp="all"   onclick="setRunPeriod('all')">全部</button>
+          <button class="seg-btn"        data-rp="month" onclick="setRunPeriod('month')">本月</button>
+          <button class="seg-btn"        data-rp="week"  onclick="setRunPeriod('week')">本周</button>
+        </div>
+        <button class="dl-btn" onclick="exportRunTable()" style="background:var(--balance)">📋 导出</button>
+        <button class="dl-btn" onclick="toggleGroups()" id="groups-toggle-btn" style="background:#6b7280">👥 分组</button>
       </div>
-      <button class="dl-btn" onclick="exportRunTable()" style="background:var(--balance)">📋 导出排行</button>
-      <button class="dl-btn" onclick="toggleGroups()" id="groups-toggle-btn" style="background:#6b7280">👥 分组</button>
-    </div>
 
-    <div class="run-table-wrap">
+      <!-- Leaderboard -->
       <div id="run-leaderboard"></div>
-    </div>
 
-    <div class="groups-wrap" id="groups-wrap" style="display:none">
-      <!-- mode toggle -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
-        <div class="seg-tabs">
-          <button class="seg-btn active" id="mode-snake-btn" onclick="setGroupMode('snake')">🐍 蛇形自动</button>
-          <button class="seg-btn"        id="mode-manual-btn" onclick="setGroupMode('manual')">✏️ 手动指定</button>
+      <!-- Groups (inside report area) -->
+      <div class="groups-wrap" id="groups-wrap" style="display:none;padding:0;margin-top:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <div class="seg-tabs">
+            <button class="seg-btn active" id="mode-snake-btn" onclick="setGroupMode('snake')">🐍 蛇形自动</button>
+            <button class="seg-btn"        id="mode-manual-btn" onclick="setGroupMode('manual')">✏️ 手动指定</button>
+          </div>
         </div>
-      </div>
-
-      <!-- snake controls -->
-      <div id="snake-ctrl" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-        <label style="font-size:13px;color:var(--muted)">分组数量</label>
-        <input type="number" id="group-count" value="4" min="2" max="10"
-               style="width:64px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px" />
-        <button class="dl-btn" onclick="generateGroups()" style="background:var(--run)">生成</button>
-      </div>
-
-      <!-- manual controls -->
-      <div id="manual-ctrl" style="display:none">
-        <div id="manual-groups-editor"></div>
-        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
-          <button class="dl-btn" onclick="addManualGroup()" style="background:#6b7280">+ 添加一组</button>
-          <button class="dl-btn" onclick="saveManualGroups()" style="background:var(--run)">✓ 保存分组</button>
+        <div id="snake-ctrl" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+          <label style="font-size:13px;color:var(--muted)">分组数量</label>
+          <input type="number" id="group-count" value="4" min="2" max="10"
+                 style="width:64px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:14px" />
+          <button class="dl-btn" onclick="generateGroups()" style="background:var(--run)">生成</button>
         </div>
+        <div id="manual-ctrl" style="display:none">
+          <div id="manual-groups-editor"></div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button class="dl-btn" onclick="addManualGroup()" style="background:#6b7280">+ 添加一组</button>
+            <button class="dl-btn" onclick="saveManualGroups()" style="background:var(--run)">✓ 保存分组</button>
+          </div>
+        </div>
+        <div class="groups-grid" id="groups-grid"></div>
       </div>
 
-      <div class="groups-grid" id="groups-grid"></div>
-    </div>
-
-    <div class="run-detail-wrap">
-      <div class="section-title">明细记录</div>
-      <div id="run-detail-list"></div>
+      <!-- Detail records -->
+      <div style="margin-top:16px">
+        <div class="section-title">明细记录</div>
+        <div id="run-detail-list"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -951,10 +951,12 @@ function updateHomeStats() {
   const exp = all.filter(r => r.dir === 'expense').reduce((s,r) => s+r.amount, 0);
   document.getElementById('home-fund-stat').textContent =
     `余额 ¥${(inc-exp).toFixed(2)} · 共 ${all.length} 笔`;
-  const runs = loadRuns();
-  const lb = buildLeaderboard(runs);
+  const runs  = loadRuns();
+  const lb    = buildLeaderboard(runs);
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCount = runs.filter(r => r.date === today).length;
   document.getElementById('home-run-stat').textContent =
-    `${lb.length} 人参与 · 共 ${runs.length} 次记录`;
+    `${lb.length} 人参与 · 今日 ${todayCount} 条记录`;
 }
 
 // ═══════════════════════════════════════
@@ -1576,14 +1578,24 @@ function buildLeaderboard(runs) {
 // RUN SUMMARY CARDS
 // ═══════════════════════════════════════
 function updateRunSummary() {
-  const runs = filterByPeriod(loadRuns());
-  const lb = buildLeaderboard(runs);
-  document.getElementById('rs-runners').textContent = lb.length;
-  const total = runs.reduce((s,r) => s + effRun(r.distance, r.elevation||0), 0);
+  const allRuns = loadRuns();
+  const today   = new Date().toISOString().slice(0, 10);
+  const todayEff = allRuns
+    .filter(r => r.date === today)
+    .reduce((s, r) => s + effRun(r.distance, r.elevation || 0), 0);
+  document.getElementById('rs-today').textContent = todayEff > 0 ? todayEff.toFixed(2) + ' km' : '0 km';
+
+  const runs = filterByPeriod(allRuns);
+  const lb   = buildLeaderboard(runs);
+  const total = runs.reduce((s, r) => s + effRun(r.distance, r.elevation || 0), 0);
   document.getElementById('rs-total').textContent = total.toFixed(1) + ' km';
-  document.getElementById('rs-top').textContent = lb.length
-    ? lb[0].name + ' ' + lb[0].totalEff.toFixed(1) + 'km'
-    : '-';
+  if (lb.length) {
+    document.getElementById('rs-top').innerHTML =
+      `<span style="font-size:16px;font-weight:700">${esc(lb[0].name)}</span><br>` +
+      `<span style="font-size:13px">${lb[0].totalEff.toFixed(2)} km</span>`;
+  } else {
+    document.getElementById('rs-top').textContent = '-';
+  }
 }
 
 // ═══════════════════════════════════════
