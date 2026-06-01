@@ -406,7 +406,7 @@
           <button class="seg-btn"        data-seg="income"  onclick="setSeg('income')">收入</button>
           <button class="seg-btn"        data-seg="expense" onclick="setSeg('expense')">支出</button>
         </div>
-        <input class="search-input" id="search" type="text" placeholder="搜索经办人/备注..." oninput="renderList()" />
+        <input class="search-input" id="search" type="text" placeholder="搜索付款人/备注..." oninput="renderList()" />
         <select class="type-filter" id="type-filter" onchange="renderList()">
           <option value="">全部类型</option>
         </select>
@@ -522,6 +522,7 @@ function setDir(dir) {
   const sel = document.getElementById('f-type');
   sel.innerHTML = TYPE_OPTS[dir].map(o => `<option value="${o}">${o}</option>`).join('');
   document.getElementById('type-label').textContent = dir === 'income' ? '收入类型' : '支出类型';
+  document.getElementById('person-label').textContent = dir === 'income' ? '付款人 *' : '付款对象 *';
 }
 
 function clearEntryForm() {
@@ -542,7 +543,7 @@ function saveRecord() {
 
   if (!date)                         return alert('请填写日期');
   if (isNaN(amount) || amount <= 0)  return alert('请填写正确金额');
-  if (!person)                       return alert('请填写经办人');
+  if (!person)                       return alert('请填写' + (currentDir === 'income' ? '付款人' : '付款对象'));
 
   const data = loadAll();
   data.push({ id: Date.now(), dir: currentDir, date, type, person, amount, remark });
@@ -566,7 +567,7 @@ function openEdit(id) {
   document.getElementById('e-person').value    = rec.person;
   document.getElementById('e-remark').value    = rec.remark;
   document.getElementById('e-type-label').textContent = rec.dir === 'income' ? '收入类型' : '支出类型';
-  document.getElementById('e-person-label').textContent = '经办人 *';
+  document.getElementById('e-person-label').textContent = rec.dir === 'income' ? '付款人 *' : '付款对象 *';
   const sel = document.getElementById('e-type');
   sel.innerHTML = TYPE_OPTS[rec.dir].map(o => `<option value="${o}"${o===rec.type?' selected':''}>${o}</option>`).join('');
   document.getElementById('edit-modal').classList.remove('hidden');
@@ -583,7 +584,7 @@ function saveEdit() {
 
   if (!date)                        return alert('请填写日期');
   if (isNaN(amount) || amount <= 0) return alert('请填写正确金额');
-  if (!person)                      return alert('请填写经办人');
+  if (!person)                      return alert('请填写' + (document.getElementById('edit-dir').value === 'income' ? '付款人' : '付款对象'));
 
   const data = loadAll();
   const rec  = data.find(r => r.id === id);
@@ -688,7 +689,7 @@ function updateSummary() {
 function downloadCSV() {
   const data = loadAll();
   if (!data.length) return alert('暂无数据');
-  const headers = ['日期','方向','类型','经办人','金额（元）','备注'];
+  const headers = ['日期','方向','类型','付款人/付款对象','金额（元）','备注'];
   const rows = data.map(r =>
     [r.date, r.dir==='income'?'收入':'支出', r.type, r.person, r.amount.toFixed(2), r.remark].map(cv));
   const inc = data.filter(r=>r.dir==='income').reduce((s,r)=>s+r.amount,0);
