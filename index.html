@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>戈21 A+ 募集资金管理</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a56db;
+      --primary-light: #e8f0fe;
+      --income: #0e9f6e;
+      --income-light: #def7ec;
+      --expense: #e02424;
+      --expense-light: #fde8e8;
+      --balance: #7e3af2;
+      --balance-light: #edebfe;
+      --border: #e5e7eb;
+      --text: #111827;
+      --muted: #6b7280;
+      --bg: #f9fafb;
+      --card: #ffffff;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 56px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    }
+    header h1 { font-size: 18px; font-weight: 700; white-space: nowrap; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      gap: 4px;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 15px;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+      font-weight: 500;
+    }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    /* ── Layout ── */
+    main { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Summary Cards ── */
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .card-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .card-value { font-size: 28px; font-weight: 700; }
+    .card.income  { border-left: 4px solid var(--income);  background: var(--income-light); }
+    .card.expense { border-left: 4px solid var(--expense); background: var(--expense-light); }
+    .card.balance { border-left: 4px solid var(--balance); background: var(--balance-light); }
+    .card.income  .card-value { color: var(--income); }
+    .card.expense .card-value { color: var(--expense); }
+    .card.balance .card-value { color: var(--balance); }
+
+    /* ── Form Box ── */
+    .form-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .form-box summary {
+      padding: 14px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      background: var(--primary-light);
+      color: var(--primary);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-box summary::before { content: "▶"; font-size: 11px; transition: transform .2s; }
+    details[open] .form-box summary::before { transform: rotate(90deg); }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      padding: 20px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 13px; font-weight: 500; color: var(--muted); }
+    input, select, textarea {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,86,219,.15);
+    }
+    textarea { resize: vertical; min-height: 72px; font-family: inherit; }
+    .form-actions { padding: 0 20px 20px; display: flex; gap: 10px; }
+    .btn {
+      padding: 9px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-danger { background: var(--expense); color: #fff; font-size: 12px; padding: 5px 10px; }
+    .btn-success { background: var(--income); color: #fff; }
+
+    /* ── Table Box ── */
+    .table-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .table-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .table-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
+    .search-input {
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      width: 200px;
+    }
+    .filter-select { width: 140px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th {
+      background: var(--bg);
+      padding: 11px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f5f7ff; }
+    .amount { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .amount.income  { color: var(--income); }
+    .amount.expense { color: var(--expense); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+    .empty-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 15px; }
+    tfoot td {
+      font-weight: 700;
+      background: var(--bg);
+      border-top: 2px solid var(--border);
+      font-size: 13px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      main { padding: 16px; }
+      .summary { grid-template-columns: 1fr 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .search-input { width: 100%; }
+      .filter-select { width: 100%; }
+      .table-header { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>⛰ 戈21 A+ 募集资金管理</h1>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="income">💰 收入管理</button>
+  <button class="tab-btn" data-tab="expense">💸 支出管理</button>
+</nav>
+
+<main>
+
+  <!-- ══════════════ 收入 Panel ══════════════ -->
+  <div id="income" class="panel active">
+
+    <div class="summary" id="income-summary">
+      <div class="card income">
+        <div class="card-label">总收入</div>
+        <div class="card-value" id="total-income">¥0.00</div>
+      </div>
+      <div class="card balance">
+        <div class="card-label">笔数</div>
+        <div class="card-value" id="total-income-count">0</div>
+      </div>
+    </div>
+
+    <details>
+      <div class="form-box">
+        <summary>+ 新增收入记录</summary>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="in-date">日期 *</label>
+            <input type="date" id="in-date" required />
+          </div>
+          <div class="form-group">
+            <label for="in-type">收入类型 *</label>
+            <select id="in-type">
+              <option value="捐款">捐款</option>
+              <option value="缴费">缴费</option>
+              <option value="报名费">报名费</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="in-person">出资人 *</label>
+            <input type="text" id="in-person" placeholder="姓名" required />
+          </div>
+          <div class="form-group">
+            <label for="in-amount">金额（元）*</label>
+            <input type="number" id="in-amount" placeholder="0.00" min="0" step="0.01" required />
+          </div>
+          <div class="form-group full">
+            <label for="in-remark">备注</label>
+            <textarea id="in-remark" placeholder="可选备注说明..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addRecord('income')">确认添加</button>
+          <button class="btn btn-secondary" onclick="clearForm('income')">清空</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="table-box">
+      <div class="table-header">
+        <h3>收入明细</h3>
+        <input class="search-input" type="text" id="in-search" placeholder="搜索出资人/备注..." oninput="renderTable('income')" />
+        <select class="filter-select" id="in-filter" onchange="renderTable('income')">
+          <option value="">全部类型</option>
+          <option value="捐款">捐款</option>
+          <option value="缴费">缴费</option>
+          <option value="报名费">报名费</option>
+          <option value="其他">其他</option>
+        </select>
+        <button class="btn btn-success" onclick="downloadCSV('income')">⬇ 下载 CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>收入类型</th>
+              <th>出资人</th>
+              <th>金额（元）</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="income-tbody"></tbody>
+          <tfoot id="income-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════ 支出 Panel ══════════════ -->
+  <div id="expense" class="panel">
+
+    <div class="summary">
+      <div class="card expense">
+        <div class="card-label">总支出</div>
+        <div class="card-value" id="total-expense">¥0.00</div>
+      </div>
+      <div class="card balance">
+        <div class="card-label">笔数</div>
+        <div class="card-value" id="total-expense-count">0</div>
+      </div>
+    </div>
+
+    <details>
+      <div class="form-box">
+        <summary>+ 新增支出记录</summary>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="ex-date">日期 *</label>
+            <input type="date" id="ex-date" required />
+          </div>
+          <div class="form-group">
+            <label for="ex-type">支出类型 *</label>
+            <select id="ex-type">
+              <option value="物料">物料</option>
+              <option value="活动">活动</option>
+              <option value="报名费">报名费</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ex-person">支出对象</label>
+            <input type="text" id="ex-person" placeholder="收款方/经办人" />
+          </div>
+          <div class="form-group">
+            <label for="ex-amount">金额（元）*</label>
+            <input type="number" id="ex-amount" placeholder="0.00" min="0" step="0.01" required />
+          </div>
+          <div class="form-group full">
+            <label for="ex-remark">备注</label>
+            <textarea id="ex-remark" placeholder="可选备注说明..."></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="addRecord('expense')">确认添加</button>
+          <button class="btn btn-secondary" onclick="clearForm('expense')">清空</button>
+        </div>
+      </div>
+    </details>
+
+    <div class="table-box">
+      <div class="table-header">
+        <h3>支出明细</h3>
+        <input class="search-input" type="text" id="ex-search" placeholder="搜索支出对象/备注..." oninput="renderTable('expense')" />
+        <select class="filter-select" id="ex-filter" onchange="renderTable('expense')">
+          <option value="">全部类型</option>
+          <option value="物料">物料</option>
+          <option value="活动">活动</option>
+          <option value="报名费">报名费</option>
+          <option value="其他">其他</option>
+        </select>
+        <button class="btn btn-success" onclick="downloadCSV('expense')">⬇ 下载 CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>日期</th>
+              <th>支出类型</th>
+              <th>支出对象</th>
+              <th>金额（元）</th>
+              <th>备注</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="expense-tbody"></tbody>
+          <tfoot id="expense-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ── Storage helpers ──
+const KEY = { income: 'ge21_income', expense: 'ge21_expense' };
+const load = k => JSON.parse(localStorage.getItem(KEY[k]) || '[]');
+const save = (k, d) => localStorage.setItem(KEY[k], JSON.stringify(d));
+
+// ── Tab switching ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Form helpers ──
+function getField(type, id) { return document.getElementById((type === 'income' ? 'in-' : 'ex-') + id); }
+
+function addRecord(type) {
+  const date   = getField(type, 'date').value.trim();
+  const t      = getField(type, 'type').value;
+  const person = getField(type, 'person').value.trim();
+  const amount = parseFloat(getField(type, 'amount').value);
+  const remark = getField(type, 'remark').value.trim();
+
+  if (!date)            return alert('请填写日期');
+  if (!person)          return alert('请填写' + (type === 'income' ? '出资人' : '支出对象'));
+  if (isNaN(amount) || amount <= 0) return alert('请填写正确金额');
+
+  const data = load(type);
+  data.push({ id: Date.now(), date, type: t, person, amount, remark });
+  data.sort((a, b) => b.date.localeCompare(a.date));
+  save(type, data);
+  clearForm(type);
+  renderTable(type);
+  updateSummary(type);
+}
+
+function clearForm(type) {
+  ['date','type','person','amount','remark'].forEach(f => {
+    const el = getField(type, f);
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+}
+
+function deleteRecord(type, id) {
+  if (!confirm('确定删除该记录？')) return;
+  save(type, load(type).filter(r => r.id !== id));
+  renderTable(type);
+  updateSummary(type);
+}
+
+// ── Render table ──
+function renderTable(type) {
+  const prefix = type === 'income' ? 'in-' : 'ex-';
+  const search = (document.getElementById(prefix + 'search').value || '').toLowerCase();
+  const filter = document.getElementById(prefix + 'filter').value;
+  const cls    = type === 'income' ? 'income' : 'expense';
+
+  let rows = load(type).filter(r => {
+    const matchSearch = !search || r.person.toLowerCase().includes(search) || r.remark.toLowerCase().includes(search);
+    const matchFilter = !filter || r.type === filter;
+    return matchSearch && matchFilter;
+  });
+
+  const tbody = document.getElementById(type + '-tbody');
+  const tfoot = document.getElementById(type + '-tfoot');
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">暂无记录</td></tr>`;
+    tfoot.innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.date}</td>
+      <td><span class="badge">${r.type}</span></td>
+      <td>${esc(r.person)}</td>
+      <td class="amount ${cls}">¥${r.amount.toFixed(2)}</td>
+      <td style="color:var(--muted);max-width:200px;">${esc(r.remark)}</td>
+      <td><button class="btn btn-danger" onclick="deleteRecord('${type}',${r.id})">删除</button></td>
+    </tr>
+  `).join('');
+
+  const total = rows.reduce((s, r) => s + r.amount, 0);
+  tfoot.innerHTML = `
+    <tr>
+      <td colspan="3">筛选合计（${rows.length} 笔）</td>
+      <td class="amount ${cls}">¥${total.toFixed(2)}</td>
+      <td colspan="2"></td>
+    </tr>
+  `;
+}
+
+// ── Summary cards ──
+function updateSummary(type) {
+  const data = load(type);
+  const total = data.reduce((s, r) => s + r.amount, 0);
+  if (type === 'income') {
+    document.getElementById('total-income').textContent = '¥' + total.toFixed(2);
+    document.getElementById('total-income-count').textContent = data.length;
+  } else {
+    document.getElementById('total-expense').textContent = '¥' + total.toFixed(2);
+    document.getElementById('total-expense-count').textContent = data.length;
+  }
+}
+
+// ── CSV download ──
+function downloadCSV(type) {
+  const data = load(type);
+  if (data.length === 0) { alert('暂无数据可下载'); return; }
+
+  const headers = type === 'income'
+    ? ['日期', '收入类型', '出资人', '金额（元）', '备注']
+    : ['日期', '支出类型', '支出对象', '金额（元）', '备注'];
+
+  const rows = data.map(r => [r.date, r.type, r.person, r.amount.toFixed(2), r.remark].map(csvCell));
+  const total = data.reduce((s, r) => s + r.amount, 0);
+  rows.push(['合计', '', '', total.toFixed(2), '']);
+
+  const csv = '﻿' + [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `戈21A+_${type === 'income' ? '收入' : '支出'}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function csvCell(v) {
+  const s = String(v ?? '');
+  return /[,"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init ──
+(function init() {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('in-date').value = today;
+  document.getElementById('ex-date').value = today;
+  renderTable('income');
+  renderTable('expense');
+  updateSummary('income');
+  updateSummary('expense');
+})();
+</script>
+</body>
+</html>
