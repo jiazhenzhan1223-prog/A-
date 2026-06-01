@@ -93,21 +93,42 @@
 
     header {
       background: var(--primary); color: #fff;
-      padding: 0 12px; display: flex; align-items: center; gap: 6px; height: 52px;
+      padding: 0 12px; display: flex; align-items: center; gap: 8px; height: 52px;
       box-shadow: 0 2px 4px rgba(0,0,0,.15);
     }
-    header h1 { font-size: 15px; font-weight: 700; white-space: nowrap; }
-    .tab-nav {
-      flex: 1; display: flex; background: rgba(255,255,255,.15);
-      border-radius: 8px; padding: 3px; gap: 2px; margin: 0 6px;
+    header h1 { font-size: 15px; font-weight: 700; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .back-btn {
+      background: rgba(255,255,255,.18); color: #fff;
+      border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
+      padding: 5px 10px; font-size: 13px; font-weight: 600; cursor: pointer;
+      white-space: nowrap; transition: background .15s; flex-shrink: 0;
     }
-    .tab-btn {
-      flex: 1; padding: 5px 10px; border: none; background: none; border-radius: 6px;
-      font-size: 13px; font-weight: 600; cursor: pointer; color: rgba(255,255,255,.7);
-      transition: all .15s; white-space: nowrap;
+    .back-btn:hover { background: rgba(255,255,255,.28); }
+    .back-btn.hidden { display: none; }
+
+    /* ══ HOME SCREEN ══ */
+    #page-home { max-width: 480px; margin: 32px auto; padding: 0 16px 60px; }
+    .home-greeting { font-size: 22px; font-weight: 700; margin-bottom: 6px; text-align: center; }
+    .home-sub { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 28px; }
+    .nav-card {
+      background: var(--card); border-radius: 16px; padding: 24px 20px;
+      margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      display: flex; align-items: center; gap: 18px; cursor: pointer;
+      border: 2px solid transparent; transition: transform .15s, box-shadow .15s, border-color .15s;
+      user-select: none;
     }
-    .tab-btn.active { background: rgba(255,255,255,.25); color: #fff; }
-    .tab-btn:hover:not(.active) { color: #fff; }
+    .nav-card:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+    .nav-card:active { transform: translateY(0); }
+    .nav-card.fund:hover { border-color: var(--income); }
+    .nav-card.run:hover  { border-color: var(--run); }
+    .nav-icon { font-size: 46px; flex-shrink: 0; }
+    .nav-body { flex: 1; min-width: 0; }
+    .nav-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .nav-sub   { font-size: 13px; color: var(--muted); }
+    .nav-stat  { font-size: 12px; margin-top: 6px; font-weight: 600; }
+    .nav-card.fund .nav-stat { color: var(--income); }
+    .nav-card.run  .nav-stat { color: var(--run); }
+    .nav-arrow { font-size: 22px; color: #d1d5db; flex-shrink: 0; }
     .hbtn {
       background: rgba(255,255,255,.18); color: #fff;
       border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
@@ -657,18 +678,39 @@
 <!-- ══ APP ══ -->
 <div id="app">
   <header>
-    <h1>⛰ 戈21 A+</h1>
-    <div class="tab-nav">
-      <button class="tab-btn active" id="tab-fund" onclick="switchPage('fund')">💰 资金</button>
-      <button class="tab-btn"        id="tab-run"  onclick="switchPage('run')">🏃 跑量</button>
-    </div>
+    <button class="back-btn hidden" id="back-btn" onclick="navigateHome()">← 返回</button>
+    <h1 id="app-title">⛰ 戈21 A+</h1>
     <button class="hbtn" onclick="openApi()">⚙ AI</button>
     <button class="hbtn" onclick="openPwd()">🔑 密码</button>
     <button class="hbtn" onclick="doLogout()">退出</button>
   </header>
 
+  <!-- ══ HOME SCREEN ══ -->
+  <div id="page-home">
+    <div class="home-greeting">⛰ 戈21 A+</div>
+    <div class="home-sub">请选择功能</div>
+    <div class="nav-card fund" onclick="navigateTo('fund')">
+      <div class="nav-icon">💰</div>
+      <div class="nav-body">
+        <div class="nav-title">资金管理</div>
+        <div class="nav-sub">收入 · 支出 · 余额</div>
+        <div class="nav-stat" id="home-fund-stat">加载中...</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </div>
+    <div class="nav-card run" onclick="navigateTo('run')">
+      <div class="nav-icon">🏃</div>
+      <div class="nav-body">
+        <div class="nav-title">跑量统计</div>
+        <div class="nav-sub">记录 · 排行 · 分组</div>
+        <div class="nav-stat" id="home-run-stat">加载中...</div>
+      </div>
+      <div class="nav-arrow">›</div>
+    </div>
+  </div>
+
   <!-- ══ FUND PAGE ══ -->
-  <div id="page-fund">
+  <div id="page-fund" style="display:none">
     <div class="summary-bar">
       <div class="sum-card income">
         <div class="sum-label">总收入</div>
@@ -706,7 +748,7 @@
   </div>
 
   <!-- ══ RUN PAGE ══ -->
-  <div id="page-run">
+  <div id="page-run" style="display:none">
     <!-- Project selector -->
     <div class="project-bar">
       <select class="project-select" id="project-select" onchange="setProject(this.value)">
@@ -878,16 +920,41 @@ function setMsg(id, text, cls) {
 }
 
 // ═══════════════════════════════════════
-// PAGE SWITCHING
+// PAGE NAVIGATION
 // ═══════════════════════════════════════
-let currentPage = 'fund';
-function switchPage(page) {
+let currentPage = 'home';
+
+function navigateHome() {
+  currentPage = 'home';
+  document.getElementById('page-home').style.display = '';
+  document.getElementById('page-fund').style.display = 'none';
+  document.getElementById('page-run').style.display  = 'none';
+  document.getElementById('back-btn').classList.add('hidden');
+  document.getElementById('app-title').textContent = '⛰ 戈21 A+';
+  updateHomeStats();
+}
+
+function navigateTo(page) {
   currentPage = page;
+  document.getElementById('page-home').style.display = 'none';
   document.getElementById('page-fund').style.display = page === 'fund' ? '' : 'none';
   document.getElementById('page-run').style.display  = page === 'run'  ? '' : 'none';
-  document.getElementById('tab-fund').classList.toggle('active', page === 'fund');
-  document.getElementById('tab-run').classList.toggle('active',  page === 'run');
-  if (page === 'run') { refreshProjectSelect(); updateRunSummary(); renderLeaderboard(); renderRunDetail(); }
+  document.getElementById('back-btn').classList.remove('hidden');
+  document.getElementById('app-title').textContent = page === 'fund' ? '💰 资金管理' : '🏃 跑量统计';
+  if (page === 'fund') { updateTypeFilter(); renderList(); updateSummary(); }
+  if (page === 'run')  { refreshProjectSelect(); updateRunSummary(); renderLeaderboard(); renderRunDetail(); }
+}
+
+function updateHomeStats() {
+  const all = loadAll();
+  const inc = all.filter(r => r.dir === 'income').reduce((s,r) => s+r.amount, 0);
+  const exp = all.filter(r => r.dir === 'expense').reduce((s,r) => s+r.amount, 0);
+  document.getElementById('home-fund-stat').textContent =
+    `余额 ¥${(inc-exp).toFixed(2)} · 共 ${all.length} 笔`;
+  const runs = loadRuns();
+  const lb = buildLeaderboard(runs);
+  document.getElementById('home-run-stat').textContent =
+    `${lb.length} 人参与 · 共 ${runs.length} 次记录`;
 }
 
 // ═══════════════════════════════════════
@@ -1841,9 +1908,7 @@ function fillRunEntry(r) {
 // APP INIT
 // ═══════════════════════════════════════
 function appInit() {
-  updateTypeFilter();
-  renderList();
-  updateSummary();
+  navigateHome();
 }
 
 // close modals on overlay click
