@@ -6,7 +6,6 @@
   <title>戈21 A+ 募集资金管理</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --primary: #1a56db;
       --primary-light: #e8f0fe;
@@ -19,547 +18,726 @@
       --border: #e5e7eb;
       --text: #111827;
       --muted: #6b7280;
-      --bg: #f9fafb;
+      --bg: #f3f4f6;
       --card: #ffffff;
-      --radius: 8px;
+      --radius: 10px;
       --shadow: 0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
     }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
+      background: var(--bg); color: var(--text); min-height: 100vh;
     }
 
-    /* ── Header ── */
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      height: 56px;
-      box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    /* ══ LOGIN ══ */
+    #login-overlay {
+      position: fixed; inset: 0;
+      background: linear-gradient(135deg, #1a56db 0%, #7e3af2 100%);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
     }
-    header h1 { font-size: 18px; font-weight: 700; white-space: nowrap; }
-
-    /* ── Tabs ── */
-    .tabs {
-      display: flex;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      gap: 4px;
+    #login-overlay.hidden { display: none; }
+    .login-box {
+      background: #fff; border-radius: 16px; padding: 40px 36px;
+      width: 100%; max-width: 360px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25); text-align: center;
     }
-    .tab-btn {
-      padding: 12px 20px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      font-size: 15px;
-      color: var(--muted);
-      border-bottom: 3px solid transparent;
-      transition: color .15s, border-color .15s;
-      font-weight: 500;
-    }
-    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-    .tab-btn:hover:not(.active) { color: var(--text); }
-
-    /* ── Layout ── */
-    main { max-width: 1200px; margin: 0 auto; padding: 24px; }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    /* ── Summary Cards ── */
-    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: var(--shadow);
-    }
-    .card-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-    .card-value { font-size: 28px; font-weight: 700; }
-    .card.income  { border-left: 4px solid var(--income);  background: var(--income-light); }
-    .card.expense { border-left: 4px solid var(--expense); background: var(--expense-light); }
-    .card.balance { border-left: 4px solid var(--balance); background: var(--balance-light); }
-    .card.income  .card-value { color: var(--income); }
-    .card.expense .card-value { color: var(--expense); }
-    .card.balance .card-value { color: var(--balance); }
-
-    /* ── Form Box ── */
-    .form-box {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-      overflow: hidden;
-    }
-    .form-box summary {
-      padding: 14px 20px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      user-select: none;
-      background: var(--primary-light);
-      color: var(--primary);
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .form-box summary::before { content: "▶"; font-size: 11px; transition: transform .2s; }
-    details[open] .form-box summary::before { transform: rotate(90deg); }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
-      padding: 20px;
-    }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group.full { grid-column: 1 / -1; }
-    label { font-size: 13px; font-weight: 500; color: var(--muted); }
-    input, select, textarea {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
+    .login-logo { font-size: 44px; margin-bottom: 8px; }
+    .login-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .login-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+    .login-box input {
+      width: 100%; padding: 12px 16px; border: 2px solid var(--border);
+      border-radius: 8px; font-size: 16px; text-align: center;
+      letter-spacing: 4px; margin-bottom: 10px;
       transition: border-color .15s, box-shadow .15s;
     }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(26,86,219,.15);
+    .login-box input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.15); }
+    .login-box input.shake { animation: shake .4s ease; border-color: var(--expense) !important; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)}
     }
-    textarea { resize: vertical; min-height: 72px; font-family: inherit; }
-    .form-actions { padding: 0 20px 20px; display: flex; gap: 10px; }
-    .btn {
-      padding: 9px 20px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: opacity .15s;
+    .login-error { font-size: 13px; color: var(--expense); min-height: 20px; margin-bottom: 8px; }
+    .login-btn {
+      width: 100%; padding: 12px; background: var(--primary); color: #fff;
+      border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
     }
-    .btn:hover { opacity: .85; }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-secondary { background: var(--border); color: var(--text); }
-    .btn-danger { background: var(--expense); color: #fff; font-size: 12px; padding: 5px 10px; }
-    .btn-success { background: var(--income); color: #fff; }
+    .login-btn:hover { opacity: .88; }
+    .login-btn:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* ── Table Box ── */
-    .table-box {
-      background: var(--card);
-      border-radius: var(--radius);
+    /* ══ MODAL BASE ══ */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      display: flex; align-items: flex-end; justify-content: center; z-index: 8000;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-sheet {
+      background: #fff; border-radius: 20px 20px 0 0; padding: 24px 24px 32px;
+      width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(60px); opacity: 0; } }
+    .modal-drag { width: 40px; height: 4px; background: #d1d5db; border-radius: 2px; margin: 0 auto 20px; }
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 20px; }
+    .modal-msg { font-size: 13px; min-height: 18px; margin-bottom: 10px; }
+    .modal-msg.error   { color: var(--expense); }
+    .modal-msg.success { color: var(--income); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .modal-hint { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+    .modal-hint a { color: var(--primary); }
+
+    /* ══ APP SHELL ══ */
+    #app { display: none; }
+    #app.visible { display: block; }
+
+    header {
+      background: var(--primary); color: #fff;
+      padding: 0 20px; display: flex; align-items: center; gap: 8px; height: 52px;
+      box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    }
+    header h1 { font-size: 16px; font-weight: 700; flex: 1; white-space: nowrap; }
+    .hbtn {
+      background: rgba(255,255,255,.18); color: #fff;
+      border: 1px solid rgba(255,255,255,.3); border-radius: 6px;
+      padding: 5px 10px; font-size: 12px; cursor: pointer;
+      white-space: nowrap; transition: background .15s;
+    }
+    .hbtn:hover { background: rgba(255,255,255,.28); }
+
+    /* ══ SUMMARY ══ */
+    .summary-bar {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px; padding: 16px; max-width: 700px; margin: 0 auto;
+    }
+    .sum-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 14px 16px; box-shadow: var(--shadow); text-align: center;
+    }
+    .sum-card.income  { border-top: 3px solid var(--income); }
+    .sum-card.expense { border-top: 3px solid var(--expense); }
+    .sum-card.balance { border-top: 3px solid var(--balance); }
+    .sum-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+    .sum-value { font-size: 20px; font-weight: 700; }
+    .sum-card.income  .sum-value { color: var(--income); }
+    .sum-card.expense .sum-value { color: var(--expense); }
+    .sum-card.balance .sum-value { color: var(--balance); }
+
+    /* ══ RECORD BUTTON ══ */
+    .record-btn-wrap { text-align: center; padding: 0 16px 16px; }
+    .record-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 50px; padding: 13px 36px;
+      font-size: 16px; font-weight: 700; cursor: pointer;
+      box-shadow: 0 4px 14px rgba(26,86,219,.4);
+      transition: opacity .15s, transform .15s;
+    }
+    .record-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .record-btn:active { transform: translateY(0); }
+
+    /* ══ LIST AREA ══ */
+    .list-wrap { max-width: 700px; margin: 0 auto; padding: 0 16px 80px; }
+
+    .filter-bar {
+      background: var(--card); border-radius: var(--radius);
+      padding: 12px 16px; margin-bottom: 12px;
       box-shadow: var(--shadow);
-      overflow: hidden;
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
     }
-    .table-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
+    .seg-tabs { display: flex; background: var(--bg); border-radius: 8px; padding: 3px; gap: 2px; }
+    .seg-btn {
+      padding: 6px 16px; border: none; background: none; border-radius: 6px;
+      font-size: 13px; font-weight: 500; cursor: pointer; color: var(--muted);
+      transition: background .15s, color .15s;
     }
-    .table-header h3 { font-size: 15px; font-weight: 600; flex: 1; }
+    .seg-btn.active { background: #fff; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
     .search-input {
-      padding: 7px 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      width: 200px;
+      flex: 1; min-width: 120px; padding: 7px 12px;
+      border: 1px solid var(--border); border-radius: 6px; font-size: 13px;
     }
-    .filter-select { width: 140px; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th {
-      background: var(--bg);
-      padding: 11px 14px;
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
+    .type-filter { width: 120px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+    .dl-btn {
+      padding: 7px 14px; background: var(--income); color: #fff;
+      border: none; border-radius: 6px; font-size: 13px; cursor: pointer;
+      white-space: nowrap; transition: opacity .15s;
     }
-    td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f5f7ff; }
-    .amount { font-weight: 600; font-variant-numeric: tabular-nums; }
-    .amount.income  { color: var(--income); }
-    .amount.expense { color: var(--expense); }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 500;
-      background: var(--primary-light);
-      color: var(--primary);
+    .dl-btn:hover { opacity: .85; }
+
+    /* ══ TRANSACTION LIST ══ */
+    .tx-list { display: flex; flex-direction: column; gap: 8px; }
+    .tx-item {
+      background: var(--card); border-radius: var(--radius);
+      padding: 14px 16px; box-shadow: var(--shadow);
+      display: grid; grid-template-columns: auto 1fr auto auto;
+      align-items: center; gap: 12px;
     }
-    .empty-row td { text-align: center; color: var(--muted); padding: 40px; font-size: 15px; }
-    tfoot td {
-      font-weight: 700;
-      background: var(--bg);
-      border-top: 2px solid var(--border);
-      font-size: 13px;
+    .tx-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .tx-dot.income  { background: var(--income); }
+    .tx-dot.expense { background: var(--expense); }
+    .tx-main {}
+    .tx-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tx-person { font-size: 15px; font-weight: 600; }
+    .tx-badge {
+      font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500;
+    }
+    .tx-badge.income  { background: var(--income-light);  color: var(--income); }
+    .tx-badge.expense { background: var(--expense-light); color: var(--expense); }
+    .tx-bottom { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .tx-amount { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .tx-amount.income  { color: var(--income); }
+    .tx-amount.expense { color: var(--expense); }
+    .tx-actions { display: flex; flex-direction: column; gap: 4px; }
+    .tx-edit-btn {
+      padding: 4px 10px; font-size: 12px; border: 1px solid var(--border);
+      border-radius: 5px; cursor: pointer; background: #fff; color: var(--primary);
+    }
+    .tx-edit-btn:hover { background: var(--primary-light); }
+    .tx-del-btn {
+      padding: 4px 10px; font-size: 12px; border: none;
+      border-radius: 5px; cursor: pointer; background: var(--expense-light); color: var(--expense);
+    }
+    .tx-del-btn:hover { background: #fca5a5; }
+
+    .tx-empty {
+      text-align: center; padding: 48px 0; color: var(--muted); font-size: 15px;
+    }
+    .tx-summary {
+      text-align: center; padding: 12px; font-size: 13px; color: var(--muted);
+      background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+      margin-top: 8px;
     }
 
-    /* ── Responsive ── */
-    @media (max-width: 640px) {
-      main { padding: 16px; }
-      .summary { grid-template-columns: 1fr 1fr; }
-      .form-grid { grid-template-columns: 1fr; }
-      .search-input { width: 100%; }
-      .filter-select { width: 100%; }
-      .table-header { flex-direction: column; align-items: stretch; }
+    /* ══ FORM in modal ══ */
+    .dir-toggle { display: flex; gap: 0; margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 2px solid var(--border); }
+    .dir-btn {
+      flex: 1; padding: 11px; border: none; background: none; cursor: pointer;
+      font-size: 15px; font-weight: 600; transition: background .15s, color .15s;
+    }
+    .dir-btn.income.active  { background: var(--income);  color: #fff; }
+    .dir-btn.expense.active { background: var(--expense); color: #fff; }
+    .dir-btn:not(.active) { color: var(--muted); }
+
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 5px; }
+    .form-row input, .form-row select, .form-row textarea {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+      border-radius: 8px; font-size: 15px; color: var(--text); background: #fff;
+      transition: border-color .15s, box-shadow .15s; font-family: inherit;
+    }
+    .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+      outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.12);
+    }
+    .form-row textarea { resize: vertical; min-height: 70px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+
+    .btn { padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-primary  { background: var(--primary); color: #fff; flex: 1; padding: 12px; font-size: 15px; }
+    .btn-cancel   { background: var(--bg); color: var(--text); }
+
+    /* pwd/api modals centered */
+    .modal-overlay.center { align-items: center; }
+    .modal-box {
+      background: #fff; border-radius: 12px; padding: 28px;
+      width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    }
+    .modal-box h3 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+    .modal-box .form-row { margin-bottom: 12px; }
+    .modal-box .form-row input {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px;
+    }
+    .modal-box .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .modal-box .btn-sm { padding: 8px 18px; font-size: 14px; }
+
+    @media (max-width: 480px) {
+      .summary-bar { gap: 8px; padding: 12px; }
+      .sum-value { font-size: 16px; }
+      .tx-item { grid-template-columns: auto 1fr auto auto; gap: 8px; }
+      .tx-amount { font-size: 15px; }
+      header h1 { font-size: 14px; }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <h1>⛰ 戈21 A+ 募集资金管理</h1>
-</header>
+<!-- ══ LOGIN ══ -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">⛰</div>
+    <div class="login-title">戈21 A+ 资金管理</div>
+    <div class="login-sub">请输入访问密码</div>
+    <input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password" />
+    <div class="login-error" id="login-error"></div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">登 录</button>
+  </div>
+</div>
 
-<nav class="tabs">
-  <button class="tab-btn active" data-tab="income">💰 收入管理</button>
-  <button class="tab-btn" data-tab="expense">💸 支出管理</button>
-</nav>
+<!-- ══ CHANGE PASSWORD MODAL ══ -->
+<div id="pwd-modal" class="modal-overlay center hidden">
+  <div class="modal-box">
+    <h3>🔑 修改密码</h3>
+    <div class="form-row"><label>当前密码</label><input type="password" id="pwd-old" /></div>
+    <div class="form-row"><label>新密码（至少 6 位）</label><input type="password" id="pwd-new" /></div>
+    <div class="form-row"><label>确认新密码</label><input type="password" id="pwd-confirm" /></div>
+    <div class="modal-msg" id="pwd-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel btn-sm" onclick="document.getElementById('pwd-modal').classList.add('hidden')">取消</button>
+      <button class="btn btn-primary btn-sm" onclick="changePassword()">确认修改</button>
+    </div>
+  </div>
+</div>
 
-<main>
+<!-- ══ RECORD ENTRY MODAL ══ -->
+<div id="entry-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="entry-modal-title">记一笔</div>
 
-  <!-- ══════════════ 收入 Panel ══════════════ -->
-  <div id="income" class="panel active">
-
-    <div class="summary" id="income-summary">
-      <div class="card income">
-        <div class="card-label">总收入</div>
-        <div class="card-value" id="total-income">¥0.00</div>
-      </div>
-      <div class="card balance">
-        <div class="card-label">笔数</div>
-        <div class="card-value" id="total-income-count">0</div>
-      </div>
+    <!-- income / expense toggle -->
+    <div class="dir-toggle">
+      <button class="dir-btn income active" id="dir-income" onclick="setDir('income')">💰 收入</button>
+      <button class="dir-btn expense" id="dir-expense" onclick="setDir('expense')">💸 支出</button>
     </div>
 
-    <details>
-      <div class="form-box">
-        <summary>+ 新增收入记录</summary>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="in-date">日期 *</label>
-            <input type="date" id="in-date" required />
-          </div>
-          <div class="form-group">
-            <label for="in-type">收入类型 *</label>
-            <select id="in-type">
-              <option value="捐款">捐款</option>
-              <option value="缴费">缴费</option>
-              <option value="报名费">报名费</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="in-person">出资人 *</label>
-            <input type="text" id="in-person" placeholder="姓名" required />
-          </div>
-          <div class="form-group">
-            <label for="in-amount">金额（元）*</label>
-            <input type="number" id="in-amount" placeholder="0.00" min="0" step="0.01" required />
-          </div>
-          <div class="form-group full">
-            <label for="in-remark">备注</label>
-            <textarea id="in-remark" placeholder="可选备注说明..."></textarea>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addRecord('income')">确认添加</button>
-          <button class="btn btn-secondary" onclick="clearForm('income')">清空</button>
-        </div>
+    <!-- fields -->
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>日期 *</label>
+        <input type="date" id="f-date" />
       </div>
-    </details>
-
-    <div class="table-box">
-      <div class="table-header">
-        <h3>收入明细</h3>
-        <input class="search-input" type="text" id="in-search" placeholder="搜索出资人/备注..." oninput="renderTable('income')" />
-        <select class="filter-select" id="in-filter" onchange="renderTable('income')">
-          <option value="">全部类型</option>
+      <div class="form-row" style="margin-bottom:0">
+        <label>金额（元）*</label>
+        <input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label id="type-label">收入类型</label>
+        <select id="f-type">
           <option value="捐款">捐款</option>
           <option value="缴费">缴费</option>
           <option value="报名费">报名费</option>
           <option value="其他">其他</option>
         </select>
-        <button class="btn btn-success" onclick="downloadCSV('income')">⬇ 下载 CSV</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>日期</th>
-              <th>收入类型</th>
-              <th>出资人</th>
-              <th>金额（元）</th>
-              <th>备注</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="income-tbody"></tbody>
-          <tfoot id="income-tfoot"></tfoot>
-        </table>
+      <div class="form-row" style="margin-bottom:0">
+        <label id="person-label">经办人 *</label>
+        <input type="text" id="f-person" placeholder="姓名" />
       </div>
     </div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="f-remark" placeholder="可选备注说明..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeEntry()">取消</button>
+      <button class="btn btn-primary" onclick="saveRecord()">确认添加</button>
+    </div>
+  </div>
+</div>
 
+<!-- ══ EDIT MODAL ══ -->
+<div id="edit-modal" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-title">编辑记录</div>
+    <input type="hidden" id="edit-id" />
+    <input type="hidden" id="edit-dir" />
+
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label>日期 *</label>
+        <input type="date" id="e-date" />
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label>金额（元）*</label>
+        <input type="number" id="e-amount" min="0" step="0.01" />
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0">
+        <label id="e-type-label">类型</label>
+        <select id="e-type"></select>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <label id="e-person-label">经办人 *</label>
+        <input type="text" id="e-person" />
+      </div>
+    </div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="e-remark"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeEdit()">取消</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存修改</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <header>
+    <h1>⛰ 戈21 A+ 资金管理</h1>
+    <button class="hbtn" onclick="openPwd()">🔑 改密码</button>
+    <button class="hbtn" onclick="doLogout()">退出</button>
+  </header>
+
+  <!-- Summary -->
+  <div class="summary-bar">
+    <div class="sum-card income">
+      <div class="sum-label">总收入</div>
+      <div class="sum-value" id="s-income">¥0.00</div>
+    </div>
+    <div class="sum-card balance">
+      <div class="sum-label">余　额</div>
+      <div class="sum-value" id="s-balance">¥0.00</div>
+    </div>
+    <div class="sum-card expense">
+      <div class="sum-label">总支出</div>
+      <div class="sum-value" id="s-expense">¥0.00</div>
+    </div>
   </div>
 
-  <!-- ══════════════ 支出 Panel ══════════════ -->
-  <div id="expense" class="panel">
-
-    <div class="summary">
-      <div class="card expense">
-        <div class="card-label">总支出</div>
-        <div class="card-value" id="total-expense">¥0.00</div>
-      </div>
-      <div class="card balance">
-        <div class="card-label">笔数</div>
-        <div class="card-value" id="total-expense-count">0</div>
-      </div>
-    </div>
-
-    <details>
-      <div class="form-box">
-        <summary>+ 新增支出记录</summary>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="ex-date">日期 *</label>
-            <input type="date" id="ex-date" required />
-          </div>
-          <div class="form-group">
-            <label for="ex-type">支出类型 *</label>
-            <select id="ex-type">
-              <option value="物料">物料</option>
-              <option value="活动">活动</option>
-              <option value="报名费">报名费</option>
-              <option value="其他">其他</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="ex-person">支出对象</label>
-            <input type="text" id="ex-person" placeholder="收款方/经办人" />
-          </div>
-          <div class="form-group">
-            <label for="ex-amount">金额（元）*</label>
-            <input type="number" id="ex-amount" placeholder="0.00" min="0" step="0.01" required />
-          </div>
-          <div class="form-group full">
-            <label for="ex-remark">备注</label>
-            <textarea id="ex-remark" placeholder="可选备注说明..."></textarea>
-          </div>
-        </div>
-        <div class="form-actions">
-          <button class="btn btn-primary" onclick="addRecord('expense')">确认添加</button>
-          <button class="btn btn-secondary" onclick="clearForm('expense')">清空</button>
-        </div>
-      </div>
-    </details>
-
-    <div class="table-box">
-      <div class="table-header">
-        <h3>支出明细</h3>
-        <input class="search-input" type="text" id="ex-search" placeholder="搜索支出对象/备注..." oninput="renderTable('expense')" />
-        <select class="filter-select" id="ex-filter" onchange="renderTable('expense')">
-          <option value="">全部类型</option>
-          <option value="物料">物料</option>
-          <option value="活动">活动</option>
-          <option value="报名费">报名费</option>
-          <option value="其他">其他</option>
-        </select>
-        <button class="btn btn-success" onclick="downloadCSV('expense')">⬇ 下载 CSV</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>日期</th>
-              <th>支出类型</th>
-              <th>支出对象</th>
-              <th>金额（元）</th>
-              <th>备注</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="expense-tbody"></tbody>
-          <tfoot id="expense-tfoot"></tfoot>
-        </table>
-      </div>
-    </div>
-
+  <!-- Record button -->
+  <div class="record-btn-wrap">
+    <button class="record-btn" onclick="openEntry()">
+      <span style="font-size:22px">＋</span> 记一笔
+    </button>
   </div>
 
-</main>
+  <!-- List -->
+  <div class="list-wrap">
+    <div class="filter-bar">
+      <div class="seg-tabs">
+        <button class="seg-btn active" data-seg="all"     onclick="setSeg('all')">全部</button>
+        <button class="seg-btn"        data-seg="income"  onclick="setSeg('income')">收入</button>
+        <button class="seg-btn"        data-seg="expense" onclick="setSeg('expense')">支出</button>
+      </div>
+      <input class="search-input" id="search" type="text" placeholder="搜索经办人/备注..." oninput="renderList()" />
+      <select class="type-filter" id="type-filter" onchange="renderList()">
+        <option value="">全部类型</option>
+      </select>
+      <button class="dl-btn" onclick="downloadCSV()">⬇ CSV</button>
+    </div>
+
+    <div class="tx-list" id="tx-list"></div>
+  </div>
+</div>
 
 <script>
-// ── Storage helpers ──
-const KEY = { income: 'ge21_income', expense: 'ge21_expense' };
-const load = k => JSON.parse(localStorage.getItem(KEY[k]) || '[]');
-const save = (k, d) => localStorage.setItem(KEY[k], JSON.stringify(d));
+'use strict';
 
-// ── Tab switching ──
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
-  });
-});
+// ═══════════════════════════════════════
+// PASSWORD
+// ═══════════════════════════════════════
+const PWD_KEY = 'ge21_pwd_hash', SES_KEY = 'ge21_authed';
 
-// ── Form helpers ──
-function getField(type, id) { return document.getElementById((type === 'income' ? 'in-' : 'ex-') + id); }
+async function sha256(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function initPwd() {
+  if (!localStorage.getItem(PWD_KEY))
+    localStorage.setItem(PWD_KEY, await sha256('20260601'));
+}
+async function verifyPwd(s) { return (await sha256(s)) === localStorage.getItem(PWD_KEY); }
 
-function addRecord(type) {
-  const date   = getField(type, 'date').value.trim();
-  const t      = getField(type, 'type').value;
-  const person = getField(type, 'person').value.trim();
-  const amount = parseFloat(getField(type, 'amount').value);
-  const remark = getField(type, 'remark').value.trim();
+async function doLogin() {
+  const btn = document.getElementById('login-btn');
+  const inp = document.getElementById('login-pwd');
+  const err = document.getElementById('login-error');
+  btn.disabled = true;
+  if (await verifyPwd(inp.value)) {
+    sessionStorage.setItem(SES_KEY, '1');
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    appInit();
+  } else {
+    err.textContent = '密码错误，请重试';
+    inp.value = '';
+    inp.classList.add('shake');
+    inp.addEventListener('animationend', () => inp.classList.remove('shake'), { once: true });
+  }
+  btn.disabled = false;
+}
+document.getElementById('login-pwd').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-  if (!date)            return alert('请填写日期');
-  if (!person)          return alert('请填写' + (type === 'income' ? '出资人' : '支出对象'));
-  if (isNaN(amount) || amount <= 0) return alert('请填写正确金额');
+function doLogout() {
+  sessionStorage.removeItem(SES_KEY);
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('login-pwd').value = '';
+  document.getElementById('login-error').textContent = '';
+}
 
-  const data = load(type);
-  data.push({ id: Date.now(), date, type: t, person, amount, remark });
+function openPwd() {
+  ['pwd-old','pwd-new','pwd-confirm'].forEach(id => document.getElementById(id).value = '');
+  setMsg('pwd-msg','','');
+  document.getElementById('pwd-modal').classList.remove('hidden');
+}
+async function changePassword() {
+  const o = document.getElementById('pwd-old').value;
+  const n = document.getElementById('pwd-new').value;
+  const c = document.getElementById('pwd-confirm').value;
+  if (!await verifyPwd(o)) return setMsg('pwd-msg','当前密码错误','error');
+  if (n.length < 6)        return setMsg('pwd-msg','新密码至少 6 位','error');
+  if (n !== c)             return setMsg('pwd-msg','两次密码不一致','error');
+  localStorage.setItem(PWD_KEY, await sha256(n));
+  setMsg('pwd-msg','密码修改成功！','success');
+  setTimeout(() => document.getElementById('pwd-modal').classList.add('hidden'), 1100);
+}
+
+function setMsg(id, text, cls) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'modal-msg' + (cls ? ' ' + cls : '');
+}
+
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const DB_KEY = 'ge21_records';
+function loadAll() { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); }
+function saveAll(data) { localStorage.setItem(DB_KEY, JSON.stringify(data)); }
+
+const TYPE_OPTS = {
+  income:  ['捐款','缴费','报名费','其他'],
+  expense: ['物料','活动','报名费','其他']
+};
+
+// ═══════════════════════════════════════
+// ENTRY MODAL
+// ═══════════════════════════════════════
+let currentDir = 'income';
+
+function openEntry(dir) {
+  currentDir = dir || 'income';
+  setDir(currentDir);
+  clearEntryForm();
+  document.getElementById('entry-modal').classList.remove('hidden');
+  document.getElementById('entry-modal-title').textContent = '记一笔';
+}
+function closeEntry() {
+  document.getElementById('entry-modal').classList.add('hidden');
+}
+
+function setDir(dir) {
+  currentDir = dir;
+  document.getElementById('dir-income').classList.toggle('active', dir === 'income');
+  document.getElementById('dir-expense').classList.toggle('active', dir === 'expense');
+  // update type options
+  const sel = document.getElementById('f-type');
+  sel.innerHTML = TYPE_OPTS[dir].map(o => `<option value="${o}">${o}</option>`).join('');
+  document.getElementById('type-label').textContent   = dir === 'income' ? '收入类型' : '支出类型';
+  document.getElementById('person-label').textContent = dir === 'income' ? '经办人 *' : '经办人 *';
+}
+
+function clearEntryForm() {
+  const today = new Date().toISOString().slice(0, 10);
+  document.getElementById('f-date').value   = today;
+  document.getElementById('f-amount').value = '';
+  document.getElementById('f-person').value = '';
+  document.getElementById('f-remark').value = '';
+  setDir(currentDir);
+}
+
+function saveRecord() {
+  const date   = document.getElementById('f-date').value.trim();
+  const amount = parseFloat(document.getElementById('f-amount').value);
+  const type   = document.getElementById('f-type').value;
+  const person = document.getElementById('f-person').value.trim();
+  const remark = document.getElementById('f-remark').value.trim();
+
+  if (!date)                         return alert('请填写日期');
+  if (isNaN(amount) || amount <= 0)  return alert('请填写正确金额');
+  if (!person)                       return alert('请填写经办人');
+
+  const data = loadAll();
+  data.push({ id: Date.now(), dir: currentDir, date, type, person, amount, remark });
   data.sort((a, b) => b.date.localeCompare(a.date));
-  save(type, data);
-  clearForm(type);
-  renderTable(type);
-  updateSummary(type);
+  saveAll(data);
+  closeEntry();
+  renderList();
+  updateSummary();
 }
 
-function clearForm(type) {
-  ['date','type','person','amount','remark'].forEach(f => {
-    const el = getField(type, f);
-    if (el.tagName === 'SELECT') el.selectedIndex = 0;
-    else el.value = '';
-  });
+// ═══════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════
+function openEdit(id) {
+  const rec = loadAll().find(r => r.id === id);
+  if (!rec) return;
+  document.getElementById('edit-id').value     = id;
+  document.getElementById('edit-dir').value    = rec.dir;
+  document.getElementById('e-date').value      = rec.date;
+  document.getElementById('e-amount').value    = rec.amount;
+  document.getElementById('e-person').value    = rec.person;
+  document.getElementById('e-remark').value    = rec.remark;
+  document.getElementById('e-type-label').textContent   = rec.dir === 'income' ? '收入类型' : '支出类型';
+  document.getElementById('e-person-label').textContent = '经办人 *';
+  const sel = document.getElementById('e-type');
+  sel.innerHTML = TYPE_OPTS[rec.dir].map(o => `<option value="${o}"${o===rec.type?' selected':''}>${o}</option>`).join('');
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+function saveEdit() {
+  const id     = parseInt(document.getElementById('edit-id').value);
+  const date   = document.getElementById('e-date').value.trim();
+  const amount = parseFloat(document.getElementById('e-amount').value);
+  const type   = document.getElementById('e-type').value;
+  const person = document.getElementById('e-person').value.trim();
+  const remark = document.getElementById('e-remark').value.trim();
+
+  if (!date)                        return alert('请填写日期');
+  if (isNaN(amount) || amount <= 0) return alert('请填写正确金额');
+  if (!person)                      return alert('请填写经办人');
+
+  const data = loadAll();
+  const rec  = data.find(r => r.id === id);
+  if (rec) { rec.date = date; rec.amount = amount; rec.type = type; rec.person = person; rec.remark = remark; }
+  data.sort((a, b) => b.date.localeCompare(a.date));
+  saveAll(data);
+  closeEdit();
+  renderList();
+  updateSummary();
 }
 
-function deleteRecord(type, id) {
+function deleteRecord(id) {
   if (!confirm('确定删除该记录？')) return;
-  save(type, load(type).filter(r => r.id !== id));
-  renderTable(type);
-  updateSummary(type);
+  saveAll(loadAll().filter(r => r.id !== id));
+  renderList();
+  updateSummary();
 }
 
-// ── Render table ──
-function renderTable(type) {
-  const prefix = type === 'income' ? 'in-' : 'ex-';
-  const search = (document.getElementById(prefix + 'search').value || '').toLowerCase();
-  const filter = document.getElementById(prefix + 'filter').value;
-  const cls    = type === 'income' ? 'income' : 'expense';
+// ═══════════════════════════════════════
+// RENDER LIST
+// ═══════════════════════════════════════
+let currentSeg = 'all';
 
-  let rows = load(type).filter(r => {
-    const matchSearch = !search || r.person.toLowerCase().includes(search) || r.remark.toLowerCase().includes(search);
-    const matchFilter = !filter || r.type === filter;
-    return matchSearch && matchFilter;
+function setSeg(seg) {
+  currentSeg = seg;
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.seg === seg));
+  updateTypeFilter();
+  renderList();
+}
+
+function updateTypeFilter() {
+  const sel = document.getElementById('type-filter');
+  const prev = sel.value;
+  let opts = ['<option value="">全部类型</option>'];
+  if (currentSeg !== 'expense') TYPE_OPTS.income.forEach(o  => opts.push(`<option value="${o}">${o}（收）</option>`));
+  if (currentSeg !== 'income')  TYPE_OPTS.expense.forEach(o => opts.push(`<option value="${o}">${o}（支）</option>`));
+  sel.innerHTML = opts.join('');
+  sel.value = prev;
+}
+
+function renderList() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const typeF  = document.getElementById('type-filter').value;
+
+  const rows = loadAll().filter(r => {
+    if (currentSeg !== 'all' && r.dir !== currentSeg) return false;
+    if (typeF && r.type !== typeF) return false;
+    if (search && !r.person.toLowerCase().includes(search) && !r.remark.toLowerCase().includes(search)) return false;
+    return true;
   });
 
-  const tbody = document.getElementById(type + '-tbody');
-  const tfoot = document.getElementById(type + '-tfoot');
+  const container = document.getElementById('tx-list');
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="6">暂无记录</td></tr>`;
-    tfoot.innerHTML = '';
+    container.innerHTML = `<div class="tx-empty">暂无记录</div>`;
     return;
   }
 
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td>${r.date}</td>
-      <td><span class="badge">${r.type}</span></td>
-      <td>${esc(r.person)}</td>
-      <td class="amount ${cls}">¥${r.amount.toFixed(2)}</td>
-      <td style="color:var(--muted);max-width:200px;">${esc(r.remark)}</td>
-      <td><button class="btn btn-danger" onclick="deleteRecord('${type}',${r.id})">删除</button></td>
-    </tr>
-  `).join('');
+  const filtInc = rows.filter(r => r.dir === 'income').reduce((s,r) => s+r.amount, 0);
+  const filtExp = rows.filter(r => r.dir === 'expense').reduce((s,r) => s+r.amount, 0);
 
-  const total = rows.reduce((s, r) => s + r.amount, 0);
-  tfoot.innerHTML = `
-    <tr>
-      <td colspan="3">筛选合计（${rows.length} 笔）</td>
-      <td class="amount ${cls}">¥${total.toFixed(2)}</td>
-      <td colspan="2"></td>
-    </tr>
-  `;
+  container.innerHTML = rows.map(r => `
+    <div class="tx-item">
+      <div class="tx-dot ${r.dir}"></div>
+      <div class="tx-main">
+        <div class="tx-top">
+          <span class="tx-person">${esc(r.person)}</span>
+          <span class="tx-badge ${r.dir}">${r.type}</span>
+        </div>
+        <div class="tx-bottom">${r.date}${r.remark ? ' · ' + esc(r.remark) : ''}</div>
+      </div>
+      <div class="tx-amount ${r.dir}">${r.dir === 'income' ? '+' : '-'}¥${r.amount.toFixed(2)}</div>
+      <div class="tx-actions">
+        <button class="tx-edit-btn" onclick="openEdit(${r.id})">编辑</button>
+        <button class="tx-del-btn"  onclick="deleteRecord(${r.id})">删除</button>
+      </div>
+    </div>
+  `).join('') + `
+    <div class="tx-summary">
+      共 ${rows.length} 笔 &nbsp;|&nbsp;
+      收入 <span style="color:var(--income);font-weight:600">+¥${filtInc.toFixed(2)}</span> &nbsp;
+      支出 <span style="color:var(--expense);font-weight:600">-¥${filtExp.toFixed(2)}</span> &nbsp;
+      净额 <span style="color:var(--balance);font-weight:600">¥${(filtInc-filtExp).toFixed(2)}</span>
+    </div>`;
 }
 
-// ── Summary cards ──
-function updateSummary(type) {
-  const data = load(type);
-  const total = data.reduce((s, r) => s + r.amount, 0);
-  if (type === 'income') {
-    document.getElementById('total-income').textContent = '¥' + total.toFixed(2);
-    document.getElementById('total-income-count').textContent = data.length;
-  } else {
-    document.getElementById('total-expense').textContent = '¥' + total.toFixed(2);
-    document.getElementById('total-expense-count').textContent = data.length;
-  }
+// ═══════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════
+function updateSummary() {
+  const all = loadAll();
+  const inc = all.filter(r => r.dir === 'income').reduce((s,r) => s+r.amount, 0);
+  const exp = all.filter(r => r.dir === 'expense').reduce((s,r) => s+r.amount, 0);
+  document.getElementById('s-income').textContent  = '¥' + inc.toFixed(2);
+  document.getElementById('s-expense').textContent = '¥' + exp.toFixed(2);
+  document.getElementById('s-balance').textContent = '¥' + (inc - exp).toFixed(2);
 }
 
-// ── CSV download ──
-function downloadCSV(type) {
-  const data = load(type);
-  if (data.length === 0) { alert('暂无数据可下载'); return; }
-
-  const headers = type === 'income'
-    ? ['日期', '收入类型', '出资人', '金额（元）', '备注']
-    : ['日期', '支出类型', '支出对象', '金额（元）', '备注'];
-
-  const rows = data.map(r => [r.date, r.type, r.person, r.amount.toFixed(2), r.remark].map(csvCell));
-  const total = data.reduce((s, r) => s + r.amount, 0);
-  rows.push(['合计', '', '', total.toFixed(2), '']);
-
-  const csv = '﻿' + [headers, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `戈21A+_${type === 'income' ? '收入' : '支出'}_${new Date().toISOString().slice(0,10)}.csv`;
+// ═══════════════════════════════════════
+// CSV
+// ═══════════════════════════════════════
+function downloadCSV() {
+  const data = loadAll();
+  if (!data.length) return alert('暂无数据');
+  const headers = ['日期','方向','类型','经办人','金额（元）','备注'];
+  const rows = data.map(r =>
+    [r.date, r.dir==='income'?'收入':'支出', r.type, r.person, r.amount.toFixed(2), r.remark].map(cv));
+  const inc = data.filter(r=>r.dir==='income').reduce((s,r)=>s+r.amount,0);
+  const exp = data.filter(r=>r.dir==='expense').reduce((s,r)=>s+r.amount,0);
+  rows.push(['合计','','','', inc.toFixed(2)+'（收入）','']);
+  rows.push(['','','','', exp.toFixed(2)+'（支出）','']);
+  rows.push(['','','','', (inc-exp).toFixed(2)+'（余额）','']);
+  const csv = '﻿' + [headers,...rows].map(r=>r.join(',')).join('\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),
+    download: `戈21A+_资金记录_${new Date().toISOString().slice(0,10)}.csv`
+  });
   a.click();
-  URL.revokeObjectURL(url);
+}
+function cv(v) { const s=String(v??''); return /[,"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:''+s; }
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════
+// APP INIT
+// ═══════════════════════════════════════
+function appInit() {
+  updateTypeFilter();
+  renderList();
+  updateSummary();
 }
 
-function csvCell(v) {
-  const s = String(v ?? '');
-  return /[,"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
+// close modals on overlay click
+['entry-modal','edit-modal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) { this.classList.add('hidden'); }
+  });
+});
 
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Init ──
-(function init() {
-  const today = new Date().toISOString().slice(0, 10);
-  document.getElementById('in-date').value = today;
-  document.getElementById('ex-date').value = today;
-  renderTable('income');
-  renderTable('expense');
-  updateSummary('income');
-  updateSummary('expense');
-})();
+initPwd().then(() => {
+  if (sessionStorage.getItem(SES_KEY) === '1') {
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    appInit();
+  }
+});
 </script>
 </body>
 </html>
