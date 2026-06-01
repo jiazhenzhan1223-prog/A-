@@ -256,37 +256,8 @@
     .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
       outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(26,86,219,.12);
     }
-    .form-row input.ai-filled { border-color: var(--income); background: #f0fdf4; }
     .form-row textarea { resize: vertical; min-height: 70px; }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-
-    /* ══ IMAGE UPLOAD ══ */
-    .img-zone {
-      border: 2px dashed var(--border); border-radius: 10px;
-      padding: 16px; text-align: center; cursor: pointer;
-      transition: border-color .2s, background .2s; margin-bottom: 14px;
-    }
-    .img-zone:hover, .img-zone.drag-over { border-color: var(--balance); background: #faf5ff; }
-    .img-zone.has-img { border-style: solid; border-color: var(--income); background: var(--income-light); cursor: default; }
-    .img-idle { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .img-idle .icon { font-size: 26px; }
-    .img-idle p { font-size: 13px; color: var(--muted); }
-    .img-preview { display: none; }
-    .img-preview.show { display: flex; gap: 12px; align-items: flex-start; }
-    .img-thumb { width: 72px; height: 72px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
-    .img-info { flex: 1; text-align: left; }
-    .img-status { font-size: 13px; margin-bottom: 6px; }
-    .img-status.loading { color: var(--balance); }
-    .img-status.done    { color: var(--income); }
-    .img-status.error   { color: var(--expense); }
-    .img-clear { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; }
-    .img-clear:hover { color: var(--expense); }
-    .spinner {
-      display: inline-block; width: 13px; height: 13px;
-      border: 2px solid #d1c4e9; border-top-color: var(--balance);
-      border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 5px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
 
     .btn { padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; transition: opacity .15s; }
     .btn:hover { opacity: .85; }
@@ -441,27 +412,6 @@
   </div>
 </div>
 
-<!-- ══ API SETTINGS MODAL ══ -->
-<div id="api-modal" class="modal-overlay center hidden">
-  <div class="modal-box">
-    <h3>⚙ AI 图片识别设置</h3>
-    <div class="form-row">
-      <label>Kimi API Key（可选，不填使用共享密钥）</label>
-      <input type="text" id="api-key-input" placeholder="sk-..." />
-      <p class="modal-hint">
-        已内置共享密钥，无需配置即可使用 AI 识图。<br>
-        如需使用自己的密钥，访问 <a href="https://platform.moonshot.cn" target="_blank">platform.moonshot.cn</a>
-        获取，填入后将优先使用。Key 仅保存在本地浏览器。
-      </p>
-    </div>
-    <div class="modal-msg" id="api-msg"></div>
-    <div class="modal-actions">
-      <button class="btn btn-cancel btn-sm" onclick="document.getElementById('api-modal').classList.add('hidden')">取消</button>
-      <button class="btn btn-primary btn-sm" onclick="saveApiKey()">保存</button>
-    </div>
-  </div>
-</div>
-
 <!-- ══ FUND RECORD ENTRY MODAL ══ -->
 <div id="entry-modal" class="modal-overlay hidden">
   <div class="modal-sheet">
@@ -471,22 +421,6 @@
       <button class="dir-btn income active" id="dir-income" onclick="setDir('income')">💰 收入</button>
       <button class="dir-btn expense" id="dir-expense" onclick="setDir('expense')">💸 支出</button>
     </div>
-    <div class="img-zone" id="img-zone"
-         ondrop="handleDrop(event)" ondragover="handleDragOver(event)"
-         ondragleave="handleDragLeave(event)" onclick="triggerImgInput()">
-      <div class="img-idle" id="img-idle">
-        <div class="icon">🖼</div>
-        <p>点击或拖拽上传凭证图片<br><small>支持微信/支付宝截图、收据（AI自动识别）</small></p>
-      </div>
-      <div class="img-preview" id="img-preview">
-        <img class="img-thumb" id="img-thumb" />
-        <div class="img-info">
-          <div class="img-status" id="img-status"></div>
-          <span class="img-clear" onclick="clearImg(event)">✕ 清除图片</span>
-        </div>
-      </div>
-    </div>
-    <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleFileInput(event)" />
     <div class="form-row-2">
       <div class="form-row" style="margin-bottom:0">
         <label>日期 *</label>
@@ -593,22 +527,6 @@
   <div class="modal-sheet">
     <div class="modal-drag"></div>
     <div class="modal-title">记一笔（跑量）</div>
-    <div class="img-zone" id="run-img-zone"
-         ondrop="handleRunDrop(event)" ondragover="handleDragOver(event)"
-         ondragleave="handleDragLeave(event)" onclick="triggerRunImgInput()">
-      <div class="img-idle" id="run-img-idle">
-        <div class="icon">🏃</div>
-        <p>点击或拖拽上传运动截图<br><small>支持跑步APP截图（AI自动识别）</small></p>
-      </div>
-      <div class="img-preview" id="run-img-preview">
-        <img class="img-thumb" id="run-img-thumb" />
-        <div class="img-info">
-          <div class="img-status" id="run-img-status"></div>
-          <span class="img-clear" onclick="clearRunImg(event)">✕ 清除图片</span>
-        </div>
-      </div>
-    </div>
-    <input type="file" id="run-img-input" accept="image/*" style="display:none" onchange="handleRunFileInput(event)" />
     <div class="form-row-2">
       <div class="form-row" style="margin-bottom:0">
         <label>姓名 *</label>
@@ -684,7 +602,6 @@
   <header>
     <button class="back-btn hidden" id="back-btn" onclick="navigateHome()">← 返回</button>
     <h1 id="app-title">⛰ 戈21 A+</h1>
-    <button class="hbtn" onclick="openApi()">⚙ AI</button>
     <button class="hbtn" onclick="openPwd()">🔑 密码</button>
     <button class="hbtn" onclick="doLogout()">退出</button>
   </header>
@@ -900,30 +817,6 @@ async function changePassword() {
   setTimeout(() => document.getElementById('pwd-modal').classList.add('hidden'), 1100);
 }
 
-// ═══════════════════════════════════════
-// API KEY
-// ═══════════════════════════════════════
-const API_STORE = 'ge21_ai_key';
-const DEFAULT_AI_KEY = 'sk-5MszggJJjHmearDyVJLWpOZu7YvCPPu4tSmxyJ9GXmeIjqd9';
-function getApiKey() { return localStorage.getItem(API_STORE) || DEFAULT_AI_KEY; }
-function openApi() {
-  document.getElementById('api-key-input').value = localStorage.getItem(API_STORE) || '';
-  setMsg('api-msg', localStorage.getItem(API_STORE) ? '' : '当前使用共享密钥', 'success');
-  document.getElementById('api-modal').classList.remove('hidden');
-}
-function saveApiKey() {
-  const v = document.getElementById('api-key-input').value.trim();
-  if (!v) {
-    localStorage.removeItem(API_STORE);
-    setMsg('api-msg','已恢复使用共享密钥','success');
-    setTimeout(() => document.getElementById('api-modal').classList.add('hidden'), 900);
-    return;
-  }
-  localStorage.setItem(API_STORE, v);
-  setMsg('api-msg','已保存个人密钥！','success');
-  setTimeout(() => document.getElementById('api-modal').classList.add('hidden'), 900);
-}
-
 function setMsg(id, text, cls) {
   const el = document.getElementById(id);
   el.textContent = text;
@@ -996,7 +889,6 @@ function openEntry(dir) {
 }
 function closeEntry() {
   document.getElementById('entry-modal').classList.add('hidden');
-  clearImg({ stopPropagation: () => {} });
 }
 
 function setDir(dir) {
@@ -1084,128 +976,6 @@ function deleteRecord(id) {
   saveAll(loadAll().filter(r => r.id !== id));
   renderList();
   updateSummary();
-}
-
-// ═══════════════════════════════════════
-// FUND IMAGE UPLOAD & GEMINI
-// ═══════════════════════════════════════
-function triggerImgInput() {
-  if (document.getElementById('img-zone').classList.contains('has-img')) return;
-  document.getElementById('img-input').click();
-}
-function handleDragOver(e)  { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
-function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
-function handleDrop(e) {
-  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f && f.type.startsWith('image/')) processImg(f);
-}
-function handleFileInput(e) {
-  if (e.target.files[0]) processImg(e.target.files[0]);
-  e.target.value = '';
-}
-function clearImg(e) {
-  e.stopPropagation();
-  document.getElementById('img-zone').classList.remove('has-img');
-  document.getElementById('img-idle').style.display = '';
-  document.getElementById('img-preview').classList.remove('show');
-  ['f-date','f-amount','f-person','f-remark'].forEach(id =>
-    document.getElementById(id).classList.remove('ai-filled'));
-}
-
-async function processImg(file) {
-  const zone = document.getElementById('img-zone');
-  const idleEl = document.getElementById('img-idle');
-  const preEl = document.getElementById('img-preview');
-  const thumb = document.getElementById('img-thumb');
-  const statusEl = document.getElementById('img-status');
-
-  thumb.src = URL.createObjectURL(file);
-  idleEl.style.display = 'none';
-  preEl.classList.add('show');
-  zone.classList.add('has-img');
-
-  statusEl.className = 'img-status loading';
-  statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
-
-  try {
-    const b64 = await toBase64(file);
-    const res = await callKimi(b64, file.type);
-    fillEntry(res);
-    statusEl.className = 'img-status done';
-    statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
-  } catch (err) {
-    statusEl.className = 'img-status error';
-    statusEl.innerHTML = '❌ 识别失败：' + (err.message || '请检查 API Key');
-  }
-}
-
-function toBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = e => res(e.target.result.split(',')[1]);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-async function callKimi(b64, mime) {
-  const today = new Date().toISOString().slice(0,10);
-  const isInc = currentDir === 'income';
-  const typeOpt = TYPE_OPTS[currentDir].join('、');
-  const prompt = `请分析这张图片（可能是微信/支付宝转账截图、银行转账、购物小票或收据）。
-提取其中的${isInc ? '收款/到账' : '付款/支出'}信息，只返回如下纯 JSON，不要加代码块标记：
-{"date":"YYYY-MM-DD（图中日期，无则用${today}）","amount":数字金额不含符号,"person":"${isInc?'付款方姓名':'收款方或商家'}，无则空字符串","type":"从[${typeOpt}]选一个","remark":"简短摘要"}
-若无法识别金额，amount 填 null。`;
-
-  const resp = await fetch('https://api.moonshot.cn/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getApiKey()}`
-    },
-    body: JSON.stringify({
-      model: 'moonshot-v1-vision-preview',
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
-          { type: 'text', text: prompt }
-        ]
-      }],
-      temperature: 0.1,
-      max_tokens: 256
-    })
-  });
-  if (!resp.ok) {
-    const e = await resp.json().catch(() => ({}));
-    throw new Error(e.error?.message || `HTTP ${resp.status}`);
-  }
-  const data = await resp.json();
-  const txt = (data.choices?.[0]?.message?.content || '').trim()
-                .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
-  return JSON.parse(txt);
-}
-
-function fillEntry(r) {
-  const set = (id, val) => {
-    if (val == null || val === '') return;
-    const el = document.getElementById(id);
-    if (el.tagName === 'SELECT') {
-      const opt = Array.from(el.options).find(o => o.value === val);
-      if (opt) el.value = val;
-    } else {
-      el.value = val;
-      el.classList.add('ai-filled');
-    }
-  };
-  set('f-date',   r.date);
-  set('f-amount', r.amount);
-  set('f-person', r.person);
-  set('f-type',   r.type);
-  set('f-remark', r.remark);
-  if (r.type && TYPE_OPTS.income.includes(r.type))  setDir('income');
-  if (r.type && TYPE_OPTS.expense.includes(r.type)) setDir('expense');
 }
 
 // ═══════════════════════════════════════
@@ -1327,7 +1097,6 @@ function openRunEntry() {
   document.getElementById('r-date').value = new Date().toISOString().slice(0,10);
   ['r-name','r-dist','r-elev','r-note'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('run-eff-preview').style.display = 'none';
-  clearRunImg({ stopPropagation: ()=>{} });
   document.getElementById('run-entry-modal').classList.remove('hidden');
 }
 function closeRunEntry() { document.getElementById('run-entry-modal').classList.add('hidden'); }
@@ -1826,109 +1595,6 @@ function exportRunTable() {
       a.click();
     }
   );
-}
-
-// ═══════════════════════════════════════
-// RUN IMAGE UPLOAD & GEMINI
-// ═══════════════════════════════════════
-function triggerRunImgInput() {
-  if (document.getElementById('run-img-zone').classList.contains('has-img')) return;
-  document.getElementById('run-img-input').click();
-}
-function handleRunDrop(e) {
-  e.preventDefault(); e.currentTarget.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f && f.type.startsWith('image/')) processRunImg(f);
-}
-function handleRunFileInput(e) {
-  if (e.target.files[0]) processRunImg(e.target.files[0]);
-  e.target.value = '';
-}
-function clearRunImg(e) {
-  e.stopPropagation();
-  document.getElementById('run-img-zone').classList.remove('has-img');
-  document.getElementById('run-img-idle').style.display = '';
-  document.getElementById('run-img-preview').classList.remove('show');
-  ['r-name','r-date','r-dist','r-elev','r-note'].forEach(id =>
-    document.getElementById(id).classList.remove('ai-filled'));
-}
-
-async function processRunImg(file) {
-  const zone = document.getElementById('run-img-zone');
-  const idleEl = document.getElementById('run-img-idle');
-  const preEl = document.getElementById('run-img-preview');
-  const thumb = document.getElementById('run-img-thumb');
-  const statusEl = document.getElementById('run-img-status');
-
-  thumb.src = URL.createObjectURL(file);
-  idleEl.style.display = 'none';
-  preEl.classList.add('show');
-  zone.classList.add('has-img');
-
-  statusEl.className = 'img-status loading';
-  statusEl.innerHTML = '<span class="spinner"></span>AI 识别中...';
-
-  try {
-    const b64 = await toBase64(file);
-    const res = await callKimiRun(b64, file.type);
-    fillRunEntry(res);
-    statusEl.className = 'img-status done';
-    statusEl.innerHTML = '✅ 识别完成，请确认信息后保存';
-  } catch(err) {
-    statusEl.className = 'img-status error';
-    statusEl.innerHTML = '❌ 识别失败：' + (err.message || '请检查 API Key');
-  }
-}
-
-async function callKimiRun(b64, mime) {
-  const today = new Date().toISOString().slice(0,10);
-  const prompt = `请分析这张运动截图（可能是跑步APP截图、运动手表截图、健康APP记录等）。
-提取其中的跑步/运动数据，只返回如下纯 JSON，不要加代码块标记：
-{"name":"跑者姓名（无则空字符串）","date":"YYYY-MM-DD（图中日期，无则用${today}）","distance":数字公里数(必须是数字),"elevation":整数爬升米数(无则0),"note":"活动名称或简短摘要"}
-若无法识别距离，distance 填 null。`;
-
-  const resp = await fetch('https://api.moonshot.cn/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${getApiKey()}`
-    },
-    body: JSON.stringify({
-      model: 'moonshot-v1-vision-preview',
-      messages: [{
-        role: 'user',
-        content: [
-          { type: 'image_url', image_url: { url: `data:${mime};base64,${b64}` } },
-          { type: 'text', text: prompt }
-        ]
-      }],
-      temperature: 0.1,
-      max_tokens: 256
-    })
-  });
-  if (!resp.ok) {
-    const e = await resp.json().catch(()=>({}));
-    throw new Error(e.error?.message || `HTTP ${resp.status}`);
-  }
-  const data = await resp.json();
-  const txt = (data.choices?.[0]?.message?.content || '').trim()
-                .replace(/^```[a-z]*\n?/i,'').replace(/```$/,'').trim();
-  return JSON.parse(txt);
-}
-
-function fillRunEntry(r) {
-  const set = (id, val) => {
-    if (val == null || val === '') return;
-    const el = document.getElementById(id);
-    el.value = val;
-    el.classList.add('ai-filled');
-  };
-  set('r-name', r.name);
-  set('r-date', r.date);
-  if (r.distance != null) set('r-dist', r.distance);
-  if (r.elevation != null) set('r-elev', r.elevation);
-  set('r-note', r.note);
-  updateRunPreview();
 }
 
 // ═══════════════════════════════════════
